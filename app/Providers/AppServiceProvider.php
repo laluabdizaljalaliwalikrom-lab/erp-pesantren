@@ -11,7 +11,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        config([
+            'filament-activity-log.resource.class' => \App\Filament\Resources\ActivityLogResource::class,
+            'filament-activity-log.widgets.enabled' => false,
+        ]);
     }
 
     /**
@@ -19,6 +22,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        \Illuminate\Support\Facades\Gate::policy(
+            \App\Models\Activity::class,
+            \App\Policies\ActivityLogPolicy::class
+        );
     }
 }

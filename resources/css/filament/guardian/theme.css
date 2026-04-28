@@ -1,0 +1,106 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@source '../../../../app/Filament/Guardian/**/*';
+@source '../../../../resources/views/filament/guardian/**/*';
+@source '../../../../vendor/filament/**/*.blade.php';
+
+
+@theme {
+    /* Design System Variables */
+    --card-bg: #ffffff;
+    --card-border: rgba(0,0,0,0.05);
+    --card-shadow: 0 10px 40px -10px rgba(0,0,0,0.1);
+    --subcard-bg: #f9fafb;
+    --text-main: #111827;
+    --text-muted: #9ca3af;
+    --glass-bg: rgba(255,255,255,0.2);
+}
+
+@layer base {
+    /* Theme-Aware Design Variables */
+    :root {
+        --card-bg: #ffffff;
+        --card-border: rgba(0,0,0,0.05);
+        --card-shadow: 0 10px 40px -10px rgba(0,0,0,0.1);
+        --subcard-bg: #f9fafb;
+        --text-main: #111827;
+        --text-muted: #9ca3af;
+        --glass-bg: rgba(255,255,255,0.2);
+    }
+    
+    /* Forced Dark Mode Overrides */
+    html.dark, .dark, [data-theme="dark"] {
+        --card-bg: #111827 !important;
+        --card-border: rgba(255,255,255,0.1) !important;
+        --card-shadow: 0 10px 40px -10px rgba(0,0,0,0.5) !important;
+        --subcard-bg: #1f2937 !important;
+        --text-main: #f9fafb !important;
+        --text-muted: #9ca3af !important;
+        --glass-bg: rgba(0,0,0,0.4) !important;
+    }
+}
+
+@layer components {
+    /* Utility Components */
+    /* Billing Card Finishes */
+    .modern-card { 
+        border-radius: 2rem !important; 
+        border: 1px solid var(--card-border) !important; 
+        box-shadow: var(--card-shadow) !important;
+        background: var(--card-bg) !important;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        overflow: hidden !important;
+        position: relative !important;
+    }
+    .modern-card:hover { 
+        transform: translateY(-5px) !important; 
+        box-shadow: 0 20px 50px -15px rgba(0,0,0,0.15) !important; 
+    }
+    
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    .bill-card-active {
+        border-color: var(--primary-500) !important;
+        background: rgba(var(--primary-500-rgb), 0.05) !important;
+    }
+
+
+    .vibrant-gradient { 
+        background: linear-gradient(135deg, #059669 0%, #0d9488 100%) !important; 
+    }
+    .vibrant-gradient span, .vibrant-gradient p, .vibrant-gradient h2, .vibrant-gradient h3 {
+        color: white !important;
+    }
+    .rose-gradient {
+        background: linear-gradient(135deg, #e11d48 0%, #be123c 100%) !important;
+    }
+
+    .guardian-icon-fix { width: 20px !important; height: 20px !important; flex-shrink: 0 !important; }
+    .guardian-icon-lg-fix { width: 40px !important; height: 40px !important; flex-shrink: 0 !important; }
+    .guardian-avatar-fix { 
+        width: 60px !important; 
+        height: 60px !important; 
+        object-fit: cover !important; 
+        border-radius: 1.25rem !important; 
+        display: block !important;
+    }
+
+    .flex-row-center { display: flex !important; flex-direction: row !important; align-items: center !important; }
+    .flex-col-start { display: flex !important; flex-direction: column !important; align-items: flex-start !important; }
+    
+    .truncate-fix { 
+        white-space: nowrap !important; 
+        overflow: hidden !important; 
+        text-overflow: ellipsis !important; 
+        display: block !important;
+    }
+    .text-responsive-xl { font-size: clamp(1.25rem, 5vw, 2rem) !important; }
+    .text-responsive-lg { font-size: clamp(1.125rem, 4vw, 1.75rem) !important; }
+    .text-responsive-base { font-size: clamp(0.75rem, 3vw, 0.875rem) !important; }
+}

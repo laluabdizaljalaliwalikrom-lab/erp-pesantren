@@ -1,0 +1,38 @@
+﻿
+   Symfony\Component\ErrorHandler\Error\FatalError 
+
+  Could not check compatibility between App\Filament\Resources\UserResource::form(Filament\Forms\Form $form): Filament\Forms\Form and Filament\Resources\Resource::form(Filament\Schemas\Schema $schema): Filament\Schemas\Schema, because class Filament\Forms\Form is not available
+
+  at app\Filament\Resources\UserResource.php:32
+     28Γûò     {
+     29Γûò         return 'User Management';
+     30Γûò     }
+     31Γûò 
+  Γ₧£  32Γûò     public static function form(Form $form): Form
+     33Γûò     {
+     34Γûò         return $form
+     35Γûò             ->schema([
+     36Γûò                 Forms\Components\Section::make('User Details')
+
+
+   Whoops\Exception\ErrorException 
+
+  Could not check compatibility between App\Filament\Resources\UserResource::form(Filament\Forms\Form $form): Filament\Forms\Form and Filament\Resources\Resource::form(Filament\Schemas\Schema $schema): Filament\Schemas\Schema, because class Filament\Forms\Form is not available
+
+  at app\Filament\Resources\UserResource.php:32
+     28Γûò     {
+     29Γûò         return 'User Management';
+     30Γûò     }
+     31Γûò 
+  Γ₧£  32Γûò     public static function form(Form $form): Form
+     33Γûò     {
+     34Γûò         return $form
+     35Γûò             ->schema([
+     36Γûò                 Forms\Components\Section::make('User Details')
+
+  1   vendor\filp\whoops\src\Whoops\Run.php:520
+      Whoops\Run::handleError("Could not check compatibility between App\Filament\Resources\UserResource::form(Filament\Forms\Form $form): Filament\Forms\Form and Filament\Resources\Resource::form(Filament\Schemas\Schema $schema): Filament\Schemas\Schema, because class Filament\Forms\Form is not available", "C:\laragon\www\erp-pesantren\app\Filament\Resources\UserResource.php")
+
+  2   [internal]:0
+      Whoops\Run::handleShutdown()
+
