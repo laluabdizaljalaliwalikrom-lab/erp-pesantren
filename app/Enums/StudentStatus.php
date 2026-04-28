@@ -17,9 +17,9 @@ enum StudentStatus: string implements HasLabel, HasColor
     public function getLabel(): ?string
     {
         return match ($this) {
-            self::ACTIVE => 'Active',
-            self::INACTIVE => 'Inactive',
-            self::GRADUATED => 'Graduated',
+            self::ACTIVE => 'Aktif',
+            self::INACTIVE => 'Tidak Aktif',
+            self::GRADUATED => 'Alumni',
             self::DROPPED_OUT => 'Dropped Out',
         };
     }

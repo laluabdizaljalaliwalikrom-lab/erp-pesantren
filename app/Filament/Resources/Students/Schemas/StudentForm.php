@@ -188,6 +188,19 @@ class StudentForm
                                     ->columnSpanFull()
                                     ->itemLabel(fn (array $state): ?string => Institution::find($state['institution_id'] ?? null)?->name ?? 'Informasi Akademik'),
                             ]),
+
+                        Tab::make('Data Kelulusan')
+                            ->icon('heroicon-m-check-badge')
+                            ->schema([
+                                TextInput::make('graduation_year')
+                                    ->label('Tahun Lulus')
+                                    ->numeric()
+                                    ->length(4),
+                                TextInput::make('after_graduation_status')
+                                    ->label('Status Pasca Lulus')
+                                    ->placeholder('Contoh: Kuliah di Al-Azhar, Bekerja, dll'),
+                            ])
+                            ->visible(fn ($get) => $get('status') === StudentStatus::GRADUATED->value || $get('status') === StudentStatus::GRADUATED),
                     ])
                     ->columnSpanFull(),
             ]);

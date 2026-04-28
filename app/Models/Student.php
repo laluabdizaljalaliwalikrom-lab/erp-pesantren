@@ -32,6 +32,8 @@ class Student extends Model
         'mother_name',
         'guardian_phone',
         'status',
+        'graduation_year',
+        'after_graduation_status',
     ];
 
     protected $casts = [
