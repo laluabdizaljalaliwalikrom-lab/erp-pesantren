@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: erp-pesantren-sikur
+    runtime: php # Ini akan memaksa Render pakai PHP
+    plan: free
+    buildCommand: "composer install --no-dev --optimize-autoloader && npm install && npm run build && php artisan config:cache && php artisan route:cache"
+    startCommand: "vendor/bin/heroku-php-apache2 public/"
+    envVars:
+      - key: PHP_VERSION
+        value: 8.3.0
