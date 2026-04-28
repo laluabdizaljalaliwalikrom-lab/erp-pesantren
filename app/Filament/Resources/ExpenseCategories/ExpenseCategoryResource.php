@@ -17,11 +17,22 @@ class ExpenseCategoryResource extends Resource
 {
     protected static ?string $model = ExpenseCategory::class;
 
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-tag';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-tag';
 
-    protected static ?string $navigationLabel = 'Kategori Pengeluaran';
-    
-    protected static ?string $modelLabel = 'Kategori Pengeluaran';
+    public static function getNavigationLabel(): string
+    {
+        return 'Kategori Pengeluaran';
+    }
+
+    public static function getModelLabel(): string
+    {
+        return 'Kategori Pengeluaran';
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return 'Data Kategori Pengeluaran';
+    }
 
     protected static UnitEnum|string|null $navigationGroup = 'Keuangan';
 

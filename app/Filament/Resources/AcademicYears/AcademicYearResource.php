@@ -15,15 +15,26 @@ class AcademicYearResource extends Resource
 {
     protected static ?string $model = AcademicYear::class;
 
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-calendar-days';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-calendar-days';
 
     protected static UnitEnum|string|null $navigationGroup = 'Akademik';
 
     protected static ?int $navigationSort = 2;
 
-    protected static ?string $modelLabel = 'Tahun Ajaran';
+    public static function getNavigationLabel(): string
+    {
+        return 'Tahun Ajaran';
+    }
 
-    protected static ?string $pluralModelLabel = 'Daftar Tahun Ajaran';
+    public static function getModelLabel(): string
+    {
+        return 'Tahun Ajaran';
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return 'Data Tahun Ajaran';
+    }
 
     public static function form(Schema $schema): Schema
     {

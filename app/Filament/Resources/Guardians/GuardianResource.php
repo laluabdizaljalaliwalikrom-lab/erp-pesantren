@@ -21,11 +21,26 @@ class GuardianResource extends Resource
 {
     protected static ?string $model = Guardian::class;
 
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-users';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-users';
 
     protected static UnitEnum|string|null $navigationGroup = 'Manajemen Santri';
 
     protected static ?int $navigationSort = 2;
+
+    public static function getNavigationLabel(): string
+    {
+        return 'Wali Santri';
+    }
+
+    public static function getModelLabel(): string
+    {
+        return 'Wali Santri';
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return 'Data Wali Santri';
+    }
 
     public static function getNavigationBadge(): ?string
     {

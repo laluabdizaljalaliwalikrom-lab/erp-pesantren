@@ -17,11 +17,22 @@ class ExpenseResource extends Resource
 {
     protected static ?string $model = Expense::class;
 
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-banknotes';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-banknotes';
 
-    protected static ?string $navigationLabel = 'Pengeluaran';
-    
-    protected static ?string $modelLabel = 'Pengeluaran';
+    public static function getNavigationLabel(): string
+    {
+        return 'Pengeluaran';
+    }
+
+    public static function getModelLabel(): string
+    {
+        return 'Pengeluaran';
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return 'Data Pengeluaran';
+    }
 
     protected static UnitEnum|string|null $navigationGroup = 'Keuangan';
 

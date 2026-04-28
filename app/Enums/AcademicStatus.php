@@ -16,9 +16,9 @@ enum AcademicStatus: string implements HasLabel, HasColor
     public function getLabel(): ?string
     {
         return match ($this) {
-            self::ACTIVE => 'Active',
-            self::GRADUATED => 'Graduated',
-            self::MOVED => 'Moved',
+            self::ACTIVE => 'Aktif',
+            self::GRADUATED => 'Lulus',
+            self::MOVED => 'Pindah',
         };
     }
 

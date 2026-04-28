@@ -19,9 +19,22 @@ class FeeResource extends Resource
 {
     protected static ?string $model = Fee::class;
 
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-currency-dollar';
-    protected static ?string $pluralModelLabel = 'Master Biaya';
-    protected static ?string $modelLabel = 'Biaya';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-currency-dollar';
+    
+    public static function getNavigationLabel(): string
+    {
+        return 'Master Biaya';
+    }
+
+    public static function getModelLabel(): string
+    {
+        return 'Biaya';
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return 'Data Master Biaya';
+    }
     protected static UnitEnum|string|null $navigationGroup = 'Keuangan';
     protected static ?int $navigationSort = 3;
 

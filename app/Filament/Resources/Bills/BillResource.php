@@ -17,11 +17,22 @@ class BillResource extends Resource
     protected static ?string $model = Bill::class;
 
     // Strict Typing for PHP 8.3 & Filament v4
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-banknotes';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-banknotes';
 
-    protected static ?string $navigationLabel = 'Daftar Tagihan (Piutang)';
-    
-    protected static ?string $modelLabel = 'Tagihan';
+    public static function getNavigationLabel(): string
+    {
+        return 'Tagihan';
+    }
+
+    public static function getModelLabel(): string
+    {
+        return 'Tagihan';
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return 'Data Tagihan';
+    }
 
     protected static UnitEnum|string|null $navigationGroup = 'Keuangan';
 

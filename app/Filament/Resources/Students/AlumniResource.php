@@ -21,13 +21,26 @@ class AlumniResource extends Resource
 {
     protected static ?string $model = Student::class;
 
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-check-badge';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-check-badge';
 
     protected static UnitEnum|string|null $navigationGroup = 'Manajemen Santri';
 
     protected static ?int $navigationSort = 3;
 
-    protected static ?string $navigationLabel = 'Data Alumni';
+    public static function getNavigationLabel(): string
+    {
+        return 'Data Alumni';
+    }
+
+    public static function getModelLabel(): string
+    {
+        return 'Alumni';
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return 'Data Alumni';
+    }
 
     protected static ?string $recordTitleAttribute = 'full_name';
 

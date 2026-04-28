@@ -16,11 +16,26 @@ class PaymentResource extends Resource
 {
     protected static ?string $model = Payment::class;
 
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-banknotes';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-banknotes';
 
     protected static UnitEnum|string|null $navigationGroup = 'Keuangan';
 
     protected static ?int $navigationSort = 2;
+
+    public static function getNavigationLabel(): string
+    {
+        return 'Pembayaran';
+    }
+
+    public static function getModelLabel(): string
+    {
+        return 'Pembayaran';
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return 'Data Pembayaran';
+    }
 
     public static function getNavigationBadge(): ?string
     {

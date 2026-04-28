@@ -15,15 +15,26 @@ class ClassResource extends Resource
 {
     protected static ?string $model = SchoolClass::class;
 
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected static UnitEnum|string|null $navigationGroup = 'Akademik';
 
     protected static ?int $navigationSort = 3;
 
-    protected static ?string $modelLabel = 'Kelas';
+    public static function getNavigationLabel(): string
+    {
+        return 'Data Kelas';
+    }
 
-    protected static ?string $pluralModelLabel = 'Daftar Kelas';
+    public static function getModelLabel(): string
+    {
+        return 'Kelas';
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return 'Data Kelas';
+    }
 
     public static function form(Schema $schema): Schema
     {

@@ -12,19 +12,19 @@ use App\Services\MidtransService;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use BackedEnum;
+use UnitEnum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use BackedEnum;
-use UnitEnum;
 use Exception;
 
 class BillResource extends Resource
 {
     protected static ?string $model = Bill::class;
 
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-document-text';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-document-text';
 
     protected static ?string $navigationLabel = 'Tagihan';
 

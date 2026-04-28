@@ -97,18 +97,38 @@
         </div>
     @endif
 
-    {{-- Custom Full Screen Loading Overlay --}}
+    {{-- Final Bulletproof Centered Loading Overlay --}}
     <div 
-        wire:loading 
+        wire:loading.flex 
         wire:target="openFinance" 
-        class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 backdrop-blur-sm transition-all"
+        class="fixed inset-0 z-[99999] flex items-center justify-center overflow-hidden"
+        style="display: none; background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(12px); position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;"
     >
-        <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl flex flex-col items-center max-w-sm w-full mx-4 border border-gray-200 dark:border-gray-700">
-            <div class="h-16 w-16 text-primary-500 mb-6 bg-primary-50 dark:bg-primary-900/20 p-3 rounded-full ring-4 ring-primary-50 dark:ring-primary-900/30">
-                <x-filament::loading-indicator class="h-full w-full" />
+        <div class="relative p-8 bg-white dark:bg-gray-900 rounded-[2rem] shadow-2xl max-w-sm w-full mx-4 border border-gray-200 dark:border-white/10 flex flex-col items-center justify-center animate-in zoom-in duration-300 overflow-hidden">
+            {{-- Decorative Gradient Background --}}
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-500 to-primary-600"></div>
+
+            <div class="mb-8 mt-4">
+                <div class="h-20 w-20 text-primary-600 bg-primary-50 dark:bg-primary-900/20 p-5 rounded-2xl ring-1 ring-primary-500/20 flex items-center justify-center relative">
+                    <x-filament::loading-indicator class="h-10 w-10" />
+                    {{-- Subtle Inner Pulse --}}
+                    <div class="absolute inset-0 rounded-2xl border-2 border-primary-500/30 animate-pulse"></div>
+                </div>
             </div>
-            <h2 class="text-xl font-bold text-gray-900 dark:text-white text-center mb-2">Membuka Terminal Pembayaran...</h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400 text-center">Tunggu sebentar, sedang menyinkronkan data tagihan dan riwayat santri.</p>
+            
+            <h2 class="text-2xl font-black text-gray-900 dark:text-white text-center mb-2 tracking-tight">
+                Memproses Data
+            </h2>
+            
+            <div class="flex items-center gap-2 mb-6">
+                <div class="h-1.5 w-1.5 bg-primary-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                <div class="h-1.5 w-1.5 bg-primary-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                <div class="h-1.5 w-1.5 bg-primary-500 rounded-full animate-bounce"></div>
+            </div>
+
+            <p class="text-sm text-gray-500 dark:text-gray-400 text-center font-medium px-4 leading-relaxed">
+                Mohon tunggu sejenak, sedang menyiapkan terminal pembayaran santri...
+            </p>
         </div>
     </div>
 </x-filament-panels::page>

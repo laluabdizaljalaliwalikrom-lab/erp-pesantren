@@ -12,6 +12,8 @@ use Filament\Tables\Table;
 use Spatie\Activitylog\Models\Activity;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Columns\TextColumn;
+use BackedEnum;
+use UnitEnum;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Actions\ViewAction;
 use Filament\Schemas\Components\Section;
@@ -20,15 +22,26 @@ class ActivityLogResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = \App\Models\Activity::class;
 
-    protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-finger-print';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-finger-print';
 
-    protected static string|null|\UnitEnum $navigationGroup = 'Pengaturan';
+    protected static UnitEnum|string|null $navigationGroup = 'Pengaturan';
 
     protected static ?int $navigationSort = 4;
 
-    protected static ?string $label = 'Activity Log';
+    public static function getNavigationLabel(): string
+    {
+        return 'Log Aktivitas';
+    }
 
-    protected static ?string $pluralLabel = 'Activity Logs';
+    public static function getModelLabel(): string
+    {
+        return 'Log Aktivitas';
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return 'Log Aktivitas';
+    }
 
     public static function getPermissionPrefixes(): array
     {
@@ -42,26 +55,27 @@ class ActivityLogResource extends Resource implements HasShieldPermissions
     {
         return $schema
             ->schema([
-                Section::make('Activity Details')
+                Section::make('Detail Aktivitas')
                     ->schema([
                         Forms\Components\TextInput::make('causer.name')
-                            ->label('Who')
+                            ->label('Oleh')
                             ->readOnly(),
                         Forms\Components\TextInput::make('description')
-                            ->label('Action')
+                            ->label('Aksi')
                             ->readOnly(),
                         Forms\Components\TextInput::make('subject_type')
-                            ->label('Subject Type')
+                            ->label('Tipe Subjek')
                             ->readOnly(),
                         Forms\Components\DateTimePicker::make('created_at')
+                            ->label('Waktu')
                             ->readOnly(),
                     ])->columns(2),
-                Section::make('Changes')
+                Section::make('Perubahan')
                     ->schema([
                         Forms\Components\KeyValue::make('properties.attributes')
-                            ->label('New Values'),
+                            ->label('Nilai Baru'),
                         Forms\Components\KeyValue::make('properties.old')
-                            ->label('Old Values'),
+                            ->label('Nilai Lama'),
                     ])->visible(fn ($record) => $record && $record->properties->count() > 0),
             ]);
     }
@@ -71,17 +85,17 @@ class ActivityLogResource extends Resource implements HasShieldPermissions
         return $table
             ->columns([
                 TextColumn::make('causer.name')
-                    ->label('Who')
+                    ->label('Oleh')
                     ->sortable()
                     ->searchable()
-                    ->placeholder('System'),
+                    ->placeholder('Sistem'),
 
                 TextColumn::make('description')
-                    ->label('Did What')
+                    ->label('Melakukan Apa')
                     ->searchable(),
 
                 TextColumn::make('subject_type')
-                    ->label('To Whom (Subject)')
+                    ->label('Tipe Subjek')
                     ->formatStateUsing(function ($state, Activity $record) {
                         $model = strtolower(class_basename($state));
                         $label = match ($model) {
@@ -97,19 +111,19 @@ class ActivityLogResource extends Resource implements HasShieldPermissions
                     ->color('info'),
 
                 TextColumn::make('created_at')
-                    ->label('When')
+                    ->label('Waktu')
                     ->dateTime('d M Y H:i')
                     ->sortable(),
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
                 Tables\Filters\SelectFilter::make('log_name')
-                    ->label('Type')
+                    ->label('Tipe')
                     ->options([
-                        'user' => 'Users',
-                        'student' => 'Students',
-                        'payment' => 'Payments',
-                        'bill' => 'Bills',
+                        'user' => 'Pengguna',
+                        'student' => 'Santri',
+                        'payment' => 'Pembayaran',
+                        'bill' => 'Tagihan',
                     ]),
             ])
             ->recordActions([

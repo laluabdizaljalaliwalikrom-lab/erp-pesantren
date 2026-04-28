@@ -30,7 +30,7 @@ class StudentForm
     {
         return $schema
             ->components([
-                Tabs::make('Student Details')
+                Tabs::make('Detail Santri')
                     ->tabs([
                         Tab::make('Identitas Pribadi')
                             ->icon('heroicon-m-user')

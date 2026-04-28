@@ -17,11 +17,22 @@ class AcademicResource extends Resource
     protected static ?string $model = StudentAcademic::class;
 
     // Strict Typing for PHP 8.3 & Filament v4
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-academic-cap';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-academic-cap';
 
-    protected static ?string $navigationLabel = 'Akademik Siswa';
-    
-    protected static ?string $modelLabel = 'Akademik Siswa';
+    public static function getNavigationLabel(): string
+    {
+        return 'Akademik Santri';
+    }
+
+    public static function getModelLabel(): string
+    {
+        return 'Akademik Santri';
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return 'Data Akademik Santri';
+    }
 
     protected static UnitEnum|string|null $navigationGroup = 'Akademik';
 

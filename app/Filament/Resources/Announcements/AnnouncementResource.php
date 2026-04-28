@@ -19,11 +19,16 @@ class AnnouncementResource extends Resource
 {
     protected static ?string $model = Announcement::class;
 
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-megaphone';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-megaphone';
 
     protected static UnitEnum|string|null $navigationGroup = 'Informasi';
 
     protected static ?int $navigationSort = 1;
+
+    public static function getNavigationLabel(): string
+    {
+        return 'Pengumuman';
+    }
 
     public static function getModelLabel(): string
     {
@@ -32,7 +37,7 @@ class AnnouncementResource extends Resource
 
     public static function getPluralModelLabel(): string
     {
-        return 'Pengumuman';
+        return 'Data Pengumuman';
     }
 
     protected static ?string $recordTitleAttribute = 'title';
