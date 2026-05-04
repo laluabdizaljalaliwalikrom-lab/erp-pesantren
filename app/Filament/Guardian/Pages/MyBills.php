@@ -100,6 +100,7 @@ class MyBills extends Page
             // Create Payment with TRX- prefix
             $payment = Payment::create([
                 'external_id' => 'TRX-' . time() . '-' . rand(100, 999),
+                'bill_id' => $this->selectedBillIds[0], // Primary reference for relationship
                 'amount' => $total,
                 'method' => 'midtrans',
                 'status' => PaymentStatus::PENDING,

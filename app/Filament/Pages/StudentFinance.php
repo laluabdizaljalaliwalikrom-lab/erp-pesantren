@@ -406,12 +406,14 @@ class StudentFinance extends Page implements HasForms, HasInfolists
             // Create a SINGLE main Payment record for the entire session
             $mainPayment = Payment::create([
                 'external_id' => $externalId,
+                'bill_id' => $selectedBills->first()->id, // Reference to the first bill for relationship tracking
                 'amount' => $amountReceived,
                 'amount_received' => $amountReceived,
                 'method' => $paymentMethod,
                 'status' => $paymentMethod === 'midtrans' ? PaymentStatus::PENDING : PaymentStatus::CONFIRMED,
                 'transaction_id' => $transactionId,
                 'payment_date' => now(),
+                'user_id' => auth()->id(),
             ]);
 
             foreach ($selectedBills as $bill) {

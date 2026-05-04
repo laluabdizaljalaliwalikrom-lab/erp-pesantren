@@ -56,9 +56,9 @@ class FinancialStatsOverview extends BaseWidget
             ->where('method', 'cash')
             ->sum('amount');
 
-        // 3. Saldo Bank (Midtrans Settlements)
+        // 3. Saldo Bank (Midtrans Settlements & Mapped Methods)
         $bankBalance = (float) Payment::where('status', PaymentStatus::CONFIRMED)
-            ->where('method', 'midtrans')
+            ->whereNotIn('method', ['cash', 'transfer'])
             ->sum('amount');
 
         // 4. Total Piutang (Total Receivables)

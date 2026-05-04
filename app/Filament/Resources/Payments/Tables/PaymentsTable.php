@@ -13,6 +13,7 @@ use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Filament\Actions\DeleteAction;
 use App\Services\WhatsappService;
 use Illuminate\Support\Number;
 use Illuminate\Support\Facades\URL;
@@ -25,45 +26,49 @@ class PaymentsTable
     public static function get(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn ($query) => $query->with(['bill.fee', 'student.guardian', 'user']))
+            ->modifyQueryUsing(fn ($query) => $query->with(['bill.fee', 'student.academicRecords.schoolClass', 'user']))
             ->columns([
                 TextColumn::make('created_at')
-                    ->label('Tanggal Transaksi')
-                    ->dateTime()
-                    ->sortable(),
+                    ->label('Waktu')
+                    ->dateTime('d/m/y H:i')
+                    ->sortable()
+                    ->description(fn (Payment $record): string => $record->external_id ?? '-'),
 
-                TextColumn::make('bill.student.full_name')
+                TextColumn::make('student.full_name')
                     ->label('Santri')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->description(fn (Payment $record): string => $record->student?->academicRecords?->first()?->schoolClass?->name ?? 'Tanpa Kelas'),
+
+                TextColumn::make('bill.fee.name')
+                    ->label('Tagihan & Periode')
+                    ->description(fn (Payment $record): string => $record->bill?->period_name ?? '-'),
 
                 TextColumn::make('user.name')
                     ->label('Kasir')
-                    ->searchable()
-                    ->sortable()
-                    ->placeholder('-'),
-
-                TextColumn::make('bill.fee.name')
-                    ->label('Jenis Biaya')
+                    ->placeholder('Tidak terdata')
                     ->sortable(),
 
                 TextColumn::make('amount')
-                    ->label('Jumlah')
+                    ->label('Nominal')
                     ->money('IDR')
-                    ->sortable(),
+                    ->sortable()
+                    ->weight('bold'),
 
                 TextColumn::make('method')
                     ->label('Metode')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'cash'     => 'success',
-                        'transfer' => 'info',
-                        default    => 'gray',
+                    ->color(fn (string $state): string => match (true) {
+                        $state === 'cash' => 'success',
+                        $state === 'transfer' => 'info',
+                        str_contains(strtolower($state), 'bank') => 'warning',
+                        str_contains(strtolower($state), 'pay') => 'primary',
+                        default => 'gray',
                     })
                     ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'cash'     => 'Tunai',
-                        'transfer' => 'Transfer',
-                        default    => $state,
+                        'cash' => 'Tunai',
+                        'transfer' => 'Transfer Manual',
+                        default => $state,
                     }),
 
                 TextColumn::make('status')
@@ -144,6 +149,12 @@ class PaymentsTable
                             ->danger()
                             ->send();
                     }),
+
+                DeleteAction::make()
+                    ->label('Batal/Hapus')
+                    ->modalHeading('Batalkan Pembayaran')
+                    ->modalDescription('Apakah Anda yakin ingin membatalkan pembayaran ini? Data tagihan terkait akan otomatis kembali menjadi belum lunas.')
+                    ->successNotificationTitle('Pembayaran dibatalkan'),
 
                 ActionGroup::make([
                     Action::make('print_a4')

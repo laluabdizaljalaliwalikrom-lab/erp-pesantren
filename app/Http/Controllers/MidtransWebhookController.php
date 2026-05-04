@@ -56,7 +56,7 @@ class MidtransWebhookController extends Controller
             if ($transactionStatus === 'settlement' || $transactionStatus === 'capture') {
                 $payment->update([
                     'status' => PaymentStatus::CONFIRMED,
-                    'method' => $type,
+                    'method' => $this->mapPaymentType($notification),
                     'reference_id' => $notification['transaction_id'] ?? $payment->reference_id,
                 ]);
                 
@@ -73,5 +73,26 @@ class MidtransWebhookController extends Controller
             Log::error('Midtrans Webhook: Error', ['message' => $e->getMessage()]);
             return response()->json(['message' => 'Internal Server Error'], 500);
         }
+    }
+
+    /**
+     * Map Midtrans payment types to readable names.
+     */
+    private function mapPaymentType(array $notification): string
+    {
+        $type = $notification['payment_type'] ?? 'midtrans';
+        
+        $map = [
+            'credit_card'    => 'Kartu Kredit',
+            'gopay'          => 'GoPay',
+            'shopeepay'      => 'ShopeePay',
+            'qris'           => 'QRIS',
+            'echannel'       => 'Mandiri Bill',
+            'cstore'         => 'Gerai Retail (' . ($notification['store'] ?? 'Indomaret/Alfamart') . ')',
+            'bank_transfer'  => 'Transfer Bank (' . strtoupper($notification['va_numbers'][0]['bank'] ?? $notification['bank'] ?? 'VA') . ')',
+            'permata_va'     => 'Transfer Bank (PERMATA)',
+        ];
+
+        return $map[$type] ?? ucwords(str_replace('_', ' ', $type));
     }
 }
