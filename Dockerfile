@@ -15,10 +15,15 @@ RUN apt-get update && apt-get install -y \
 # 2. Enable Apache modules
 RUN a2enmod rewrite
 
-# 3. Ubah DocumentRoot Apache ke folder /public (KUNCI PERBAIKAN)
+# 3. Ubah DocumentRoot Apache ke folder /public & Izinkan .htaccess
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+RUN echo "<Directory ${APACHE_DOCUMENT_ROOT}>\n\
+    Options Indexes FollowSymLinks\n\
+    AllowOverride All\n\
+    Require all granted\n\
+    </Directory>" >> /etc/apache2/apache2.conf
 
 # 4. Install & Enable PHP extensions
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd intl zip
