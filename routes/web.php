@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ReceiptController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan;
 use App\Models\Bill;
 use App\Services\MidtransService;
 
@@ -47,3 +48,8 @@ Route::get('/students/{student}/statement', function (\App\Models\Student $stude
         'total' => $bills->sum('remaining_balance'),
     ]);
 })->name('student.statement');
+
+Route::get('/migrate-db', function () {
+    Artisan::call('migrate', ['--force' => true]);
+    return "Database berhasil dimigrasi!";
+});
