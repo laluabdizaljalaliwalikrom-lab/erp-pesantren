@@ -5,27 +5,27 @@ COPY composer.json composer.lock ./
 RUN composer install --no-dev --no-scripts --no-autoloader --ignore-platform-reqs
 
 # --- STAGE 2: Production Image ---
-ARG PROJECT_ID=project-abe744c2-29af-4c9b-ab9
-FROM asia-southeast2-docker.pkg.dev/${PROJECT_ID}/erp-pesantren-repo/php8.3-pesantren-base:latest
+# Hardcoded base image path for stability and speed
+FROM asia-southeast2-docker.pkg.dev/project-abe744c2-29af-4c9b-ab9/erp-pesantren-repo/php8.3-pesantren-base:latest
 
 WORKDIR /var/www/html
 
-# 1. Install Node.js (Tetap di sini karena butuh folder vendor untuk build Filament)
+# 1. Install Node.js
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
     apt-get install -y nodejs && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# 2. Copy Vendor dari stage builder (Instant)
+# 2. Copy Vendor (Instant from Stage 1)
 COPY --from=vendor-builder /app/vendor /var/www/html/vendor
 
-# 3. Copy Node config dan install (Agar ter-cache jika tidak ada perubahan package.json)
+# 3. Cache NPM install layer
 COPY package*.json ./
 RUN npm install
 
-# 4. Copy sisa kode aplikasi
+# 4. Copy Application Source
 COPY . .
 
-# 5. Finalize & Build Aset
+# 5. Finalize & Build Assets
 RUN composer dump-autoload --no-dev --optimize && \
     npm run build && \
     rm -rf node_modules
