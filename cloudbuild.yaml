@@ -1,13 +1,12 @@
-steps:
   # 1. Build & Push menggunakan Kaniko (Sangat Cepat & Caching Pintar)
   - name: 'gcr.io/kaniko-project/executor:latest'
     args:
-      - --destination=asia-southeast2-docker.pkg.dev/$PROJECT_ID/erp-pesantren-repo/erp-pesantren:$COMMIT_SHA
-      - --destination=asia-southeast2-docker.pkg.dev/$PROJECT_ID/erp-pesantren-repo/erp-pesantren:latest
+      - --destination=asia-southeast2-docker.pkg.dev/project-abe744c2-29af-4c9b-ab9/erp-pesantren-repo/erp-pesantren:$COMMIT_SHA
+      - --destination=asia-southeast2-docker.pkg.dev/project-abe744c2-29af-4c9b-ab9/erp-pesantren-repo/erp-pesantren:latest
       - --cache=true
       - --cache-ttl=168h
       - --dockerfile=Dockerfile
-      - --build-arg=PROJECT_ID=$PROJECT_ID
+      - --build-arg=PROJECT_ID=project-abe744c2-29af-4c9b-ab9
 
   # 2. Deploy ke Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -17,7 +16,7 @@ steps:
       - 'deploy'
       - 'erp-pesantren'
       - '--image'
-      - 'asia-southeast2-docker.pkg.dev/$PROJECT_ID/erp-pesantren-repo/erp-pesantren:$COMMIT_SHA'
+      - 'asia-southeast2-docker.pkg.dev/project-abe744c2-29af-4c9b-ab9/erp-pesantren-repo/erp-pesantren:$COMMIT_SHA'
       - '--region'
       - 'asia-southeast2'
       - '--platform'
@@ -30,4 +29,4 @@ options:
 
 # Penanda image yang dihasilkan
 images:
-  - 'asia-southeast2-docker.pkg.dev/$PROJECT_ID/erp-pesantren-repo/erp-pesantren:$COMMIT_SHA'
+  - 'asia-southeast2-docker.pkg.dev/project-abe744c2-29af-4c9b-ab9/erp-pesantren-repo/erp-pesantren:$COMMIT_SHA'
