@@ -163,6 +163,31 @@ class ManageSettings extends Page implements HasSchemas
                                             ->label('Sejarah Pesantren'),
                                     ]),
                             ]),
+
+                        Tabs\Tab::make('Pimpinan Pesantren')
+                            ->icon('heroicon-o-user')
+                            ->schema([
+                                Section::make('Sambutan Pimpinan')
+                                    ->description('Informasi mengenai pimpinan pesantren.')
+                                    ->schema([
+                                        TextInput::make('director_name')
+                                            ->label('Nama Pimpinan')
+                                            ->placeholder('KH. Ahmad Dahlan...'),
+                                        TextInput::make('director_title')
+                                            ->label('Jabatan')
+                                            ->placeholder('Pengasuh Pondok / Mudir...'),
+                                        FileUpload::make('director_image_path')
+                                            ->label('Foto Pimpinan')
+                                            ->disk('public')
+                                            ->image()
+                                            ->directory('app-settings')
+                                            ->visibility('public')
+                                            ->imagePreviewHeight('150'),
+                                        RichEditor::make('director_greeting')
+                                            ->label('Teks Sambutan')
+                                            ->columnSpanFull(),
+                                    ])->columns(2),
+                            ]),
                     ])->columnSpanFull(),
             ])
             ->statePath('data');
