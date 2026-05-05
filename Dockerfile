@@ -27,8 +27,11 @@ RUN composer dump-autoload --no-dev --optimize && \
     npm run build && \
     rm -rf node_modules
 
-# 5. Permissions (Pastikan Apache bisa baca folder public)
-RUN chown -R www-data:www-data /var/www/html
+# 5. Finalize App (Storage Link & Permissions)
+RUN mkdir -p storage/app/public storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache && \
+    php artisan storage:link && \
+    chown -R www-data:www-data /var/www/html && \
+    chmod -R 775 storage bootstrap/cache
 
 # 6. Cloud Run Port Configuration (Gunakan tanda kutip ganda)
 EXPOSE 8080
