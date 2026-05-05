@@ -47,6 +47,16 @@ class StudentForm
                                     ->required()
                                     ->prefixIcon('heroicon-m-user'),
 
+                                TextInput::make('nik')
+                                    ->label('NIK')
+                                    ->length(16)
+                                    ->prefixIcon('heroicon-m-identification'),
+
+                                TextInput::make('no_kk')
+                                    ->label('No. KK')
+                                    ->length(16)
+                                    ->prefixIcon('heroicon-m-identification'),
+
                                 TextInput::make('nis')
                                     ->label('NIS')
                                     ->required()
@@ -72,6 +82,14 @@ class StudentForm
                                     ->label('Tanggal Lahir')
                                     ->required()
                                     ->native(false),
+
+                                TextInput::make('sibling_position')
+                                    ->label('Anak Ke')
+                                    ->numeric(),
+
+                                TextInput::make('sibling_count')
+                                    ->label('Jumlah Saudara')
+                                    ->numeric(),
 
                                 Select::make('status')
                                     ->label('Status Santri')
@@ -109,15 +127,36 @@ class StudentForm
                                 Textarea::make('address')
                                     ->label('Alamat Lengkap')
                                     ->required()
-                                    ->rows(3)
+                                    ->rows(2)
                                     ->columnSpanFull(),
 
-                                TextInput::make('guardian_phone')
-                                    ->label('No. HP / WA Wali')
+                                TextInput::make('rt')
+                                    ->label('RT')
+                                    ->maxLength(5),
+
+                                TextInput::make('rw')
+                                    ->label('RW')
+                                    ->maxLength(5),
+
+                                TextInput::make('dusun')
+                                    ->label('Dusun/Lingkungan'),
+
+                                TextInput::make('village')
+                                    ->label('Kelurahan/Desa'),
+
+                                TextInput::make('district')
+                                    ->label('Kecamatan'),
+
+                                TextInput::make('hp')
+                                    ->label('No. HP Santri')
                                     ->tel()
-                                    ->placeholder('Masukkan nomor HP aktif untuk koordinasi')
                                     ->prefixIcon('heroicon-m-phone'),
-                            ]),
+
+                                TextInput::make('email')
+                                    ->label('Email Santri')
+                                    ->email()
+                                    ->prefixIcon('heroicon-m-envelope'),
+                            ])->columns(2),
 
                         Tab::make('Orang Tua / Wali')
                             ->icon('heroicon-m-users')
@@ -134,19 +173,33 @@ class StudentForm
                                     ->label('Nama Ayah')
                                     ->prefixIcon('heroicon-m-user'),
 
+                                TextInput::make('father_nik')
+                                    ->label('NIK Ayah')
+                                    ->length(16),
+
                                 TextInput::make('mother_name')
                                     ->label('Nama Ibu')
                                     ->prefixIcon('heroicon-m-user'),
 
+                                TextInput::make('mother_nik')
+                                    ->label('NIK Ibu')
+                                    ->length(16),
+
                                 TextInput::make('guardian_phone')
                                     ->label('No. HP Wali (Override)')
                                     ->tel()
+                                    ->columnSpanFull()
                                     ->helperText('Kosongkan jika ingin menggunakan No. HP dari data wali utama'),
                             ])->columns(2),
 
                         Tab::make('Akademik')
                             ->icon('heroicon-m-academic-cap')
                             ->schema([
+                                TextInput::make('previous_school')
+                                    ->label('Sekolah Asal')
+                                    ->columnSpanFull()
+                                    ->prefixIcon('heroicon-m-building-library'),
+
                                 Repeater::make('academicRecords')
                                     ->relationship('academicRecords')
                                     ->label('Riwayat / Status Akademik')

@@ -42,7 +42,24 @@ class ListStudents extends ListRecords
                     $filePath = Storage::disk('local')->path($data['file']);
                     
                     try {
-                        $rows = SimpleExcelReader::create($filePath)->getRows();
+                        $headerRowNumber = 5;
+                        $found = false;
+                        
+                        $tempRows = SimpleExcelReader::create($filePath)->noHeaderRow()->getRows();
+                        foreach ($tempRows as $index => $row) {
+                            $rowString = implode(' ', array_values($row));
+                            if (stripos($rowString, 'NISN') !== false && stripos($rowString, 'Nama') !== false) {
+                                $headerRowNumber = $index + 1;
+                                $found = true;
+                                break;
+                            }
+                        }
+
+                        $rows = SimpleExcelReader::create($filePath)
+                            ->headerOnRow($headerRowNumber - 1)
+                            ->getRows()
+                            ->skip(1);
+                            
                     } catch (\Exception $e) {
                         Notification::make()
                             ->danger()
@@ -54,21 +71,31 @@ class ListStudents extends ListRecords
 
                     $successCount = 0;
                     $failedCount = 0;
+                    $skippedCount = 0;
+                    $errorLog = [];
 
-                    $rows->each(function (array $row) use (&$successCount, &$failedCount) {
+                    $rows->each(function (array $row, $index) use (&$successCount, &$failedCount, &$skippedCount, &$errorLog) {
                         try {
-                            $nisn = $row['Nomor Induk Siswa Nasional'] ?? null;
+                            $nisn = $row['NISN'] ?? null;
                             
-                            // Skip if no NISN as it's our unique identifier
-                            if (empty($nisn)) {
-                                $failedCount++;
+                            if (empty($nisn) || $nisn === 'NISN') {
+                                if (!empty($row['Nama'])) {
+                                    $failedCount++;
+                                    $errorLog[] = "Baris " . ($index + 7) . ": NISN Kosong";
+                                }
+                                return;
+                            }
+
+                            // CEK VALIDASI: Jika NISN sudah ada, skip (jangan sampai dobel)
+                            if (Student::where('nisn', $nisn)->exists()) {
+                                $skippedCount++;
                                 return;
                             }
 
                             // Gender mapping
-                            $genderRaw = $row['Jenis Kelamin'] ?? null;
-                            $gender = Gender::MALE; // default
-                            if (stripos((string)$genderRaw, 'P') !== false || stripos((string)$genderRaw, 'Perempuan') !== false) {
+                            $genderRaw = $row['JK'] ?? null;
+                            $gender = Gender::MALE;
+                            if (stripos((string)$genderRaw, 'P') !== false) {
                                 $gender = Gender::FEMALE;
                             }
 
@@ -83,41 +110,63 @@ class ListStudents extends ListRecords
                                 }
                             }
 
-                            Student::updateOrCreate(
-                                ['nisn' => $nisn],
-                                [
-                                    'full_name' => $row['Nama Lengkap'] ?? 'Tanpa Nama',
-                                    'nis' => $row['NIS'] ?? $row['Nomor Induk'] ?? null,
-                                    'birth_place' => $row['Tempat Lahir'] ?? null,
-                                    'birth_date' => $dob,
-                                    'gender' => $gender,
-                                    'mother_name' => $row['Nama Ibu Kandung'] ?? null,
-                                    // Default values for required fields or specific setup
-                                    'status' => StudentStatus::ACTIVE,
-                                    'residency_status' => ResidencyStatus::NON_RESIDENT,
-                                ]
-                            );
+                            // Helper untuk membersihkan data
+                            $clean = fn($val) => (empty(trim((string)$val)) ? null : trim((string)$val));
+
+                            Student::create([
+                                'nisn'             => $nisn,
+                                'full_name'        => $clean($row['Nama']) ?? 'Tanpa Nama',
+                                'nis'              => $clean($row['NIPD']) ?? $clean($row['NIS']) ?? null,
+                                'nik'              => $clean($row['NIK']) ?? null,
+                                'no_kk'            => $clean($row['No KK']) ?? null,
+                                'birth_place'      => $clean($row['Tempat Lahir']) ?? null,
+                                'birth_date'       => $dob,
+                                'gender'           => $gender,
+                                'address'          => $clean($row['Alamat']) ?? null,
+                                'rt'               => $clean($row['RT']) ?? null,
+                                'rw'               => $clean($row['RW']) ?? null,
+                                'dusun'            => $clean($row['Dusun']) ?? null,
+                                'village'          => $clean($row['Kelurahan']) ?? null,
+                                'district'         => $clean($row['Kecamatan']) ?? null,
+                                'father_name'      => $clean($row['Data Ayah']) ?? null,
+                                'mother_name'      => $clean($row['Data Ibu']) ?? null,
+                                'hp'               => $clean($row['HP']) ?? $clean($row['Telepon']) ?? null,
+                                'email'            => $clean($row['E-Mail']) ?? null,
+                                'previous_school'  => $clean($row['Sekolah Asal']) ?? null,
+                                'sibling_position' => $clean($row['Anak ke-berapa']) ?? null,
+                                'sibling_count'    => $clean($row['Jml. Saudara Kandung']) ?? $clean($row["Jml. Saudara\nKandung"]) ?? null,
+                                'status'           => StudentStatus::ACTIVE,
+                                'residency_status' => ResidencyStatus::TIDAK_MUKIM,
+                            ]);
 
                             $successCount++;
                         } catch (\Exception $e) {
                             $failedCount++;
+                            $errorLog[] = "Baris " . ($index + 7) . " (" . ($row['Nama'] ?? 'N/A') . "): " . $e->getMessage();
                         }
                     });
 
-                    // Cleanup uploaded file
+                    // Cleanup
                     Storage::disk('local')->delete($data['file']);
+
+                    if ($successCount > 0 || $skippedCount > 0) {
+                        $body = "{$successCount} Data baru diimport.";
+                        if ($skippedCount > 0) {
+                            $body .= " {$skippedCount} Data dilewati (sudah ada).";
+                        }
+                        
+                        Notification::make()
+                            ->success()
+                            ->title('Proses Selesai')
+                            ->body($body)
+                            ->send();
+                    }
 
                     if ($failedCount > 0) {
                         Notification::make()
                             ->warning()
-                            ->title('Import Selesai dengan Catatan')
-                            ->body("{$successCount} Data berhasil, {$failedCount} Data gagal karena format rusak atau NISN kosong.")
-                            ->send();
-                    } else {
-                        Notification::make()
-                            ->success()
-                            ->title('Import Berhasil')
-                            ->body("{$successCount} Data santri berhasil diimport dari Dapodik.")
+                            ->title('Ada Data Gagal')
+                            ->body("{$failedCount} Gagal. Log: " . implode(', ', array_slice($errorLog, 0, 1)))
                             ->send();
                     }
                 }),
