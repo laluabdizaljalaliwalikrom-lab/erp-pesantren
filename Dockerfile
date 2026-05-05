@@ -1,36 +1,31 @@
-# --- STAGE 1: PHP Dependencies ---
+# --- STAGE 1: Composer dependencies ---
 FROM composer:latest AS vendor-builder
 WORKDIR /app
 COPY composer.json composer.lock ./
+# Cache composer downloads
 RUN composer install --no-dev --no-scripts --no-autoloader --ignore-platform-reqs
 
-# --- STAGE 2: Production Image ---
-# Hardcoded base image path for stability and speed
+# --- STAGE 2: Final Production ---
 FROM asia-southeast2-docker.pkg.dev/project-abe744c2-29af-4c9b-ab9/erp-pesantren-repo/php8.3-pesantren-base:latest
 
 WORKDIR /var/www/html
 
-# 1. Install Node.js
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
-    apt-get install -y nodejs && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# 2. Copy Vendor (Instant from Stage 1)
+# 1. Copy Vendor (Instant)
 COPY --from=vendor-builder /app/vendor /var/www/html/vendor
 
-# 3. Cache NPM install layer
+# 2. Copy Node config & Cache install
 COPY package*.json ./
-RUN npm install
+RUN npm install --no-audit --no-fund
 
-# 4. Copy Application Source
+# 3. Copy App Source
 COPY . .
 
-# 5. Finalize & Build Assets
+# 4. Fast Build
 RUN composer dump-autoload --no-dev --optimize && \
     npm run build && \
     rm -rf node_modules
 
-# 6. Permissions & Port
+# 5. Config
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 EXPOSE 8080
 ENV PORT 8080

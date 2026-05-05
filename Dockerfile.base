@@ -1,8 +1,7 @@
 FROM php:8.3-apache
 
-# 1. Install system dependencies & PHP extensions
-# Ini adalah bagian terberat yang memakan waktu 2-3 menit.
-# Kita kerjakan sekali saja di base image ini.
+# 1. Install system dependencies, PHP extensions, AND Node.js
+# Memasukkan Nodejs ke base image menghemat 40-60 detik setiap build aplikasi.
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libonig-dev \
@@ -14,6 +13,8 @@ RUN apt-get update && apt-get install -y \
     libicu-dev \
     libzip-dev \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd intl zip \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # 2. Install Composer (Global)

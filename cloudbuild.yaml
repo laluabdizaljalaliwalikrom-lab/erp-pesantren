@@ -25,7 +25,6 @@ steps:
       - '--allow-unauthenticated'
 
 options:
-  machineType: 'E2_HIGHCPU_8'  # Ganti ke mesin yang lebih kuat (8 CPU) untuk build paralel
   logging: CLOUD_LOGGING
   dynamic_substitutions: true
 
