@@ -13,6 +13,8 @@ use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\EmbeddedSchema;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Contracts\HasSchemas;
@@ -132,6 +134,34 @@ class ManageSettings extends Page implements HasSchemas
                                             ->default('#008000')
                                             ->required(),
                                     ])->columns(2),
+                            ]),
+
+                        Tabs\Tab::make('Konten Landing Page')
+                            ->icon('heroicon-o-presentation-chart-bar')
+                            ->schema([
+                                Section::make('Hero Section')
+                                    ->schema([
+                                        TextInput::make('hero_title')
+                                            ->label('Hero Title')
+                                            ->placeholder('Mencetak Generasi Rabbani...'),
+                                        Textarea::make('hero_subtitle')
+                                            ->label('Hero Subtitle')
+                                            ->placeholder('Visi Utama: Terwujudnya...'),
+                                    ]),
+
+                                Section::make('Visi & Misi')
+                                    ->schema([
+                                        RichEditor::make('vision')
+                                            ->label('Visi'),
+                                        RichEditor::make('mission')
+                                            ->label('Misi'),
+                                    ]),
+
+                                Section::make('Sejarah')
+                                    ->schema([
+                                        RichEditor::make('history')
+                                            ->label('Sejarah Pesantren'),
+                                    ]),
                             ]),
                     ])->columnSpanFull(),
             ])

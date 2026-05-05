@@ -13,8 +13,24 @@ Route::get('/test-payment/{bill_id}', function ($bill_id, MidtransService $servi
     return view('payment_page', ['snapToken' => $snapToken, 'bill' => $bill]);
 });
 
+use App\Models\Announcement;
+use App\Models\Student;
+use App\Enums\StudentStatus;
+
 Route::get('/', function () {
-    return view('welcome');
+    $stats = [
+        'students_count' => Student::where('status', StudentStatus::ACTIVE)->count(),
+        'alumni_count' => Student::where('status', StudentStatus::GRADUATED)->count(),
+        'teachers_count' => \App\Models\User::count(), // Simplified
+        'achievements_count' => 12, // Still static for now or can be added to settings
+    ];
+
+    $news = Announcement::where('is_active', true)
+        ->latest('published_at')
+        ->take(3)
+        ->get();
+
+    return view('landing', compact('stats', 'news'));
 });
 
 // Payment Receipt — legacy single-layout

@@ -13,6 +13,11 @@ class AppSetting extends Model
 
     protected $fillable = [
         'pesantren_name',
+        'hero_title',
+        'hero_subtitle',
+        'vision',
+        'mission',
+        'history',
         'leader_name',
         'address',
         'phone',
