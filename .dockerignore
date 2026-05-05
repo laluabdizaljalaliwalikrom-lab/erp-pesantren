@@ -1,0 +1,15 @@
+node_modules
+npm-debug.log
+public/build
+public/storage
+storage/*.key
+vendor
+.env
+.git
+.github
+.gitignore
+.editorconfig
+.styleci.yml
+docker-compose.yml
+Dockerfile
+.dockerignore

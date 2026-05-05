@@ -35,22 +35,23 @@ WORKDIR /var/www/html
 # 6. Tambahkan exception untuk Git
 RUN git config --global --add safe.directory /var/www/html
 
-# 7. Install Node.js & NPM
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
-    apt-get install -y nodejs
-
-# 8. Install dependencies & build assets
-RUN npm install
-RUN npm run build
-
-# 9. Install Composer
+# 7. Install Composer & Dependencies (PHP)
+# Vendor harus ada sebelum npm run build karena CSS Filament mengimpor file dari vendor
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN composer install --no-dev --optimize-autoloader
 
-# 8. Set permissions (Pastikan www-data punya akses)
+# 8. Install Node.js & NPM
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y nodejs
+
+# 9. Install Node dependencies & build assets
+RUN npm install
+RUN npm run build
+
+# 10. Set permissions (Pastikan www-data punya akses)
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-# 9. Konfigurasi Port untuk Cloud Run
+# 11. Konfigurasi Port untuk Cloud Run
 EXPOSE 8080
 ENV PORT 8080
 RUN sed -i 's/80/${PORT}/g' /etc/apache2/sites-available/000-default.conf /etc/apache2/ports.conf
