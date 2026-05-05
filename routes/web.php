@@ -68,9 +68,12 @@ Route::get('/students/{student}/statement', function (\App\Models\Student $stude
 Route::get('/migrate-db', function () {
     try {
         // 'migrate:fresh' akan menghapus SEMUA tabel dan mengulang dari awal secara bersih
-        Artisan::call('migrate:fresh', ['--force' => true]);
+        Artisan::call('migrate:fresh', [
+            '--force' => true,
+            '--seed' => true,
+        ]);
         return "Gagah! Database berhasil di-reset dan dimigrasi dari nol: <br><pre>" . Artisan::output() . "</pre>";
     } catch (\Exception $e) {
-        return "Waduh, gagal lagi: " . $e->getMessage();
+        return "Migration failed: " . $e->getMessage();
     }
 });
