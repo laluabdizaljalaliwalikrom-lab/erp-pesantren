@@ -35,7 +35,15 @@ WORKDIR /var/www/html
 # 6. Tambahkan exception untuk Git
 RUN git config --global --add safe.directory /var/www/html
 
-# 7. Install Composer
+# 7. Install Node.js & NPM
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y nodejs
+
+# 8. Install dependencies & build assets
+RUN npm install
+RUN npm run build
+
+# 9. Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN composer install --no-dev --optimize-autoloader
 
