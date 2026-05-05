@@ -25,7 +25,7 @@ steps:
       - '--allow-unauthenticated'
 
 options:
-  logging: CLOUD_LOGGING
+  logging: CLOUD_LOGGING_ONLY
   dynamic_substitutions: true
 
 images:
