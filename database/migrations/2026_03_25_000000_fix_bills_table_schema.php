@@ -16,7 +16,7 @@ return new class extends Migration
                 $table->foreignUuid('student_id')->constrained()->cascadeOnDelete();
             }
             if (!Schema::hasColumn('bills', 'billing_event_id')) {
-                $table->foreignUuid('billing_event_id')->constrained()->cascadeOnDelete();
+                $table->uuid('billing_event_id');
             }
 
             // Add the missing bill_number column

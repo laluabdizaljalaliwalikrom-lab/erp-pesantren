@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('bills', function (Blueprint $table) {
-            $table->dropForeign(['billing_event_id']);
+            // $table->dropForeign(['billing_event_id']); // Removed as constraint doesn't exist
             $table->dropColumn(['billing_event_id', 'original_amount', 'discount_amount', 'final_amount', 'paid_amount', 'bill_number']);
 
             $table->foreignUuid('fee_id')->nullable()->after('student_id')->constrained('fees')->cascadeOnDelete();
@@ -33,7 +33,7 @@ return new class extends Migration
             $table->dropForeign(['academic_year_id']);
             $table->dropColumn(['fee_id', 'academic_year_id', 'amount', 'due_date', 'period_name']);
 
-            $table->foreignUuid('billing_event_id')->nullable()->constrained('billing_events')->cascadeOnDelete();
+            $table->uuid('billing_event_id')->nullable();
             $table->string('bill_number')->nullable();
             $table->decimal('original_amount', 15, 2)->default(0);
             $table->decimal('discount_amount', 15, 2)->default(0);

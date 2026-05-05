@@ -12,7 +12,7 @@ return new class extends Migration {
         Schema::create('bills', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('student_id')->constrained()->cascadeOnDelete();
-            $table->foreignUuid('billing_event_id')->constrained()->cascadeOnDelete();
+            $table->uuid('billing_event_id');
             $table->decimal('original_amount', 12, 2);
             $table->decimal('discount_amount', 12, 2)->default(0);
             $table->decimal('final_amount', 12, 2);
