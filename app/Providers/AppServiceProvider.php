@@ -23,13 +23,18 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Super Admin Bypass
+        \Illuminate\Support\Facades\Gate::before(function ($user, $ability) {
+            return $user->hasRole('super_admin') ? true : null;
+        });
+
         \Illuminate\Support\Facades\Gate::policy(
             \App\Models\Activity::class,
             \App\Policies\ActivityLogPolicy::class
         );
 
         if (str_contains(config('app.url'), 'ngrok-free.app')) {
-        URL::forceScheme('https');
-    }
+            URL::forceScheme('https');
+        }
     }
 }

@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,8 +14,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Create Admin User (Emergency Bypass)
-        User::updateOrCreate(
+        // 1. Create Super Admin Role
+        $role = Role::firstOrCreate(['name' => 'super_admin']);
+
+        // 2. Create Admin User
+        $user = User::updateOrCreate(
             ['email' => 'admin@erp.com'],
             [
                 'name' => 'Super Admin',
@@ -22,5 +26,8 @@ class DatabaseSeeder extends Seeder
                 'email_verified_at' => now(),
             ]
         );
+
+        // 3. Assign Role
+        $user->assignRole($role);
     }
 }
