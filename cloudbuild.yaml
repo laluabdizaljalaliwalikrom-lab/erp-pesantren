@@ -27,6 +27,3 @@ steps:
 options:
   logging: CLOUD_LOGGING_ONLY
   dynamic_substitutions: true
-
-images:
-  - 'asia-southeast2-docker.pkg.dev/project-abe744c2-29af-4c9b-ab9/erp-pesantren-repo/erp-pesantren:$COMMIT_SHA'
