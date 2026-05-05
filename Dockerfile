@@ -1,5 +1,6 @@
 # Definisikan ARG sebelum FROM agar bisa digunakan dalam path image
-ARG PROJECT_ID
+# Gunakan default value sebagai fallback jika ARG tidak terisi
+ARG PROJECT_ID=laluabdizaljalaliwalikrom-lab
 FROM asia-southeast2-docker.pkg.dev/${PROJECT_ID}/erp-pesantren-repo/php8.3-pesantren-base:latest
 
 WORKDIR /var/www/html
