@@ -1,0 +1,13 @@
+steps:
+  # Build base image menggunakan Docker builder resmi Google
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'build', 
+      '-t', 'asia-southeast2-docker.pkg.dev/$PROJECT_ID/erp-pesantren-repo/php8.3-pesantren-base:latest', 
+      '-f', 'Dockerfile.base', 
+      '.'
+    ]
+
+# Ganti 'erp-pesantren-repo' dengan nama repositori Anda di Artifact Registry
+images:
+  - 'asia-southeast2-docker.pkg.dev/$PROJECT_ID/erp-pesantren-repo/php8.3-pesantren-base:latest'

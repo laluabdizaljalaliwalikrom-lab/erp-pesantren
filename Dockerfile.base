@@ -1,0 +1,26 @@
+FROM php:8.3-apache
+
+# 1. Install system dependencies & PHP extensions
+# Ini adalah bagian terberat yang memakan waktu 2-3 menit.
+# Kita kerjakan sekali saja di base image ini.
+RUN apt-get update && apt-get install -y \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    zip \
+    unzip \
+    git \
+    curl \
+    libicu-dev \
+    libzip-dev \
+    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd intl zip \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# 2. Install Composer (Global)
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# 3. Enable Apache Modules
+RUN a2enmod rewrite
+
+# 4. Set working directory
+WORKDIR /var/www/html

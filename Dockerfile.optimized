@@ -1,0 +1,61 @@
+# --- STAGE 1: Build Assets (Node.js) ---
+FROM node:20-slim AS asset-builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+# Kita butuh folder vendor/filament untuk build theme CSS Filament
+# Tapi di stage ini kita hanya fokus build JS/CSS reguler jika tidak ada dependensi ke vendor
+# Jika ada dependensi ke vendor, kita harus copy vendor dari stage PHP
+# Namun untuk kecepatan maksimal, kita asumsikan build aset tidak butuh vendor atau kita build di stage PHP saja.
+# Untuk Laravel + Filament, biasanya build aset butuh vendor. Jadi kita gabung saja atau pakai multi-stage yang cerdas.
+
+# --- STAGE 2: PHP Dependencies (Composer) ---
+FROM composer:latest AS vendor-builder
+WORKDIR /app
+COPY composer*.json ./
+RUN composer install --no-dev --no-scripts --no-autoloader --ignore-platform-reqs
+COPY . .
+RUN composer dump-autoload --no-dev --optimize
+
+# --- STAGE 3: Final Production Image ---
+# Menggunakan image yang sudah di-optimize atau base image resmi
+FROM php:8.3-apache
+
+# Optimasi: Install dependencies sistem sekaligus dan bersihkan cache apt
+RUN apt-get update && apt-get install -y \
+    libpng-dev libonig-dev libxml2-dev zip unzip git curl libicu-dev libzip-dev \
+    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd intl zip \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Konfigurasi Apache
+RUN a2enmod rewrite
+ENV APACHE_DOCUMENT_ROOT /var/www/html/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+
+WORKDIR /var/www/html
+
+# Copy vendor dari stage sebelumnya (Sangat Cepat!)
+COPY --from=vendor-builder /app/vendor /var/www/html/vendor
+
+# Copy source code aplikasi
+COPY . /var/www/html
+
+# Install Node & Build Aset di dalam stage final agar bisa akses folder vendor untuk Filament
+# Agar tetap cepat, kita gunakan cache layer untuk npm install
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y nodejs && \
+    npm install && \
+    npm run build && \
+    apt-get purge -y nodejs && apt-get autoremove -y && rm -rf node_modules
+
+# Set permissions
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+
+# Konfigurasi Port Cloud Run
+EXPOSE 8080
+ENV PORT 8080
+RUN sed -i 's/80/${PORT}/g' /etc/apache2/sites-available/000-default.conf /etc/apache2/ports.conf
+
+CMD ["apache2-foreground"]

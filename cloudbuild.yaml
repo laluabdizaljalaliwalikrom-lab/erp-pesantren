@@ -1,0 +1,31 @@
+steps:
+  # Build image menggunakan Kaniko untuk caching layer yang sangat cepat
+  - name: 'gcr.io/kaniko-project/executor:latest'
+    args:
+      - --destination=gcr.io/$PROJECT_ID/erp-pesantren:$COMMIT_SHA
+      - --destination=gcr.io/$PROJECT_ID/erp-pesantren:latest
+      - --cache=true
+      - --cache-ttl=168h
+      - --dockerfile=Dockerfile
+
+  # Deploy ke Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'erp-pesantren'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/erp-pesantren:$COMMIT_SHA'
+      - '--region'
+      - 'asia-southeast2'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+
+images:
+  - 'gcr.io/$PROJECT_ID/erp-pesantren:$COMMIT_SHA'
+
+options:
+  logging: CLOUD_LOGGING
+  dynamic_substitutions: true
