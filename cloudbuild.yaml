@@ -7,6 +7,7 @@ steps:
       - --cache=true
       - --cache-ttl=168h
       - --dockerfile=Dockerfile
+      - --build-arg=PROJECT_ID=$PROJECT_ID
 
   # Deploy ke Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'

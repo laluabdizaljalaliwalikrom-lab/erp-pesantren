@@ -1,5 +1,5 @@
-# MEMANGGIL BASE IMAGE (Sangat Cepat!)
-# Pastikan Anda sudah menjalankan build base image di Cloud Shell terlebih dahulu
+# Definisikan ARG sebelum FROM agar bisa digunakan dalam path image
+ARG PROJECT_ID
 FROM asia-southeast2-docker.pkg.dev/${PROJECT_ID}/erp-pesantren-repo/php8.3-pesantren-base:latest
 
 WORKDIR /var/www/html
