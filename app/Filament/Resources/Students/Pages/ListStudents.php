@@ -49,50 +49,104 @@ class ListStudents extends ListRecords
                                     ])
                                     ->required()
                                     ->live()
-                                    ->afterStateUpdated(function ($state, $set) {
+                                    ->afterStateUpdated(function ($state, $set, $component) {
                                         if (!$state) return;
                                         
-                                        // Baca file untuk preview
-                                        $tempPath = tempnam(sys_get_temp_dir(), 'preview_');
-                                        file_put_contents($tempPath, Storage::get($state));
+                                        try {
+                                            // Cek apakah $state sudah berupa objek file atau masih nama file
+                                            $file = ($state instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) 
+                                                ? $state 
+                                                : ($component->getUploadedFiles()[$state] ?? null);
+
+                                            if (!$file) return;
+
+                                            $extension = $file->getClientOriginalExtension();
+                                            $tempPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'preview_' . uniqid() . '.' . $extension;
+                                            
+                                            $fileContent = $file->get();
+                                            if (!$fileContent) return;
+                                            
+                                            file_put_contents($tempPath, $fileContent);
+                                        } catch (\Exception $e) {
+                                            return;
+                                        }
                                         
                                         try {
-                                            $headerRowNumber = 5;
-                                            $tempRows = SimpleExcelReader::create($tempPath)->noHeaderRow()->getRows();
-                                            foreach ($tempRows as $index => $row) {
-                                                $rowString = implode(' ', array_values($row));
-                                                if (stripos($rowString, 'NISN') !== false && stripos($rowString, 'Nama') !== false) {
+                                            $reader = SimpleExcelReader::create($tempPath);
+                                            
+                                            // 1. Cari baris judul (header)
+                                            $headerRowNumber = 1; 
+                                            $allRows = $reader->noHeaderRow()->getRows()->take(20);
+                                            foreach ($allRows as $index => $row) {
+                                                $rowString = strtoupper(implode(' ', array_values($row)));
+                                                if (str_contains($rowString, 'NISN') && (str_contains($rowString, 'NAMA') || str_contains($rowString, 'PESERTA'))) {
                                                     $headerRowNumber = $index + 1;
                                                     break;
                                                 }
                                             }
 
+                                            // 2. Baca ulang data dari baris judul yang ditemukan
                                             $rows = SimpleExcelReader::create($tempPath)
                                                 ->headerOnRow($headerRowNumber - 1)
-                                                ->getRows()
-                                                ->skip(1);
+                                                ->getRows();
 
                                             $previewData = [];
                                             foreach ($rows as $row) {
-                                                $nisn = (string)($row['NISN'] ?? '');
-                                                if (empty($nisn) || stripos($nisn, 'NISN') !== false) continue;
+                                                $cleanRow = [];
+                                                foreach($row as $key => $val) { $cleanRow[trim(strtoupper($key))] = $val; }
 
-                                                $exists = Student::where('nisn', $nisn)->exists();
+                                                $nisn = trim((string)($cleanRow['NISN'] ?? ''));
+                                                $nis  = trim((string)($cleanRow['NIPD'] ?? $cleanRow['NIS'] ?? ''));
+                                                $nama = $cleanRow['NAMA'] ?? $cleanRow['NAMA PESERTA DIDIK'] ?? null;
+
+                                                if (empty($nisn) || $nisn === 'NISN') continue;
+
+                                                $activeStudent = Student::where('nisn', $nisn)->first();
+                                                if (!$activeStudent && !empty($nis)) {
+                                                    $activeStudent = Student::where('nis', $nis)->first();
+                                                }
+
+                                                $trashedStudent = null;
+                                                if (!$activeStudent) {
+                                                    $trashedStudent = Student::onlyTrashed()->where('nisn', $nisn)->first();
+                                                    if (!$trashedStudent && !empty($nis)) {
+                                                        $trashedStudent = Student::onlyTrashed()->where('nis', $nis)->first();
+                                                    }
+                                                }
+
+                                                $status = 'baru';
+                                                $shouldImport = true;
+                                                
+                                                if ($activeStudent) {
+                                                    $status = 'aktif';
+                                                    $shouldImport = false; // Admin pilih sendiri mau update atau tidak
+                                                } elseif ($trashedStudent) {
+                                                    $status = 'terhapus';
+                                                    $shouldImport = true; // Anggap baru/restore otomatis
+                                                }
 
                                                 $previewData[] = [
-                                                    'should_import' => !$exists,
+                                                    'should_import' => $shouldImport,
                                                     'nisn' => $nisn,
-                                                    'full_name' => $row['Nama'] ?? 'N/A',
-                                                    'is_exists' => $exists,
+                                                    'full_name' => $nama ?? 'N/A',
+                                                    'status_data' => $status,
                                                     'raw_data' => $row,
                                                 ];
                                             }
                                             
                                             $set('preview_data', $previewData);
+                                            
+                                            if (empty($previewData)) {
+                                                Notification::make()->warning()->title('Data tidak ditemukan')->body('Sistem tidak menemukan kolom NISN dan Nama di file tersebut.')->send();
+                                            }
+
                                         } catch (\Exception $e) {
-                                            // Error silent
+                                            Notification::make()->danger()->title('Gagal memproses Excel')->body($e->getMessage())->send();
                                         } finally {
-                                            if (file_exists($tempPath)) unlink($tempPath);
+                                            // Pastikan reader dilepas sebelum dihapus
+                                            unset($reader);
+                                            unset($rows);
+                                            if (file_exists($tempPath)) @unlink($tempPath);
                                         }
                                     }),
                             ]),
@@ -111,19 +165,35 @@ class ListStudents extends ListRecords
                                                 TextInput::make('nisn')
                                                     ->label('NISN')
                                                     ->disabled()
+                                                    ->dehydrated()
+                                                    ->hint(fn ($state, $get) => match($get('status_data')) {
+                                                        'aktif' => '⚠️ Sudah Terdaftar',
+                                                        'terhapus' => '♻️ Pernah Dihapus',
+                                                        default => null,
+                                                    })
+                                                    ->hintColor(fn ($get) => $get('status_data') === 'terhapus' ? 'info' : 'warning')
                                                     ->columnSpan(2),
                                                 TextInput::make('full_name')
                                                     ->label('Nama Lengkap')
                                                     ->disabled()
                                                     ->columnSpan(3),
-                                                Toggle::make('is_exists')
+                                                TextInput::make('status_data')
                                                     ->label('Status')
-                                                    ->onIcon('heroicon-m-exclamation-triangle')
-                                                    ->offIcon('heroicon-m-check')
-                                                    ->onColor('danger')
-                                                    ->offColor('success')
+                                                    ->formatStateUsing(fn ($state) => match($state) {
+                                                        'aktif' => '⚠️ Sudah Ada (Aktif)',
+                                                        'terhapus' => '♻️ Pernah Dihapus',
+                                                        default => '✅ Data Baru',
+                                                    })
+                                                    ->extraInputAttributes(fn ($state) => [
+                                                        'style' => match($state) {
+                                                            'aktif' => 'color: orange; font-weight: bold',
+                                                            'terhapus' => 'color: blue; font-weight: bold',
+                                                            default => 'color: green; font-weight: bold',
+                                                        }
+                                                    ])
                                                     ->disabled()
                                                     ->columnSpan(2),
+                                                \Filament\Forms\Components\Hidden::make('raw_data'), // Simpan data asli di sini
                                             ])
                                             ->columns(8)
                                             ->compact()
@@ -146,17 +216,29 @@ class ListStudents extends ListRecords
 
                     $successCount = 0;
                     $failedCount = 0;
+                    $errors = [];
 
                     foreach ($toImport as $item) {
                         try {
-                            $row = $item['raw_data'];
+                            $raw = $item['raw_data'];
+                            // Bersihkan kunci agar mudah diakses (uppercase & trim)
+                            $row = [];
+                            foreach($raw as $k => $v) { $row[trim(strtoupper($k))] = $v; }
+                            
                             $nisn = $item['nisn'];
+                            $nis  = trim((string)($row['NIPD'] ?? $row['NIS'] ?? ''));
 
-                            $genderRaw = $row['JK'] ?? null;
+                            // Cari data yang sudah ada (termasuk yang dihapus)
+                            $student = Student::withTrashed()->where('nisn', $nisn)->first();
+                            if (!$student && !empty($nis)) {
+                                $student = Student::withTrashed()->where('nis', $nis)->first();
+                            }
+
+                            $genderRaw = $row['JK'] ?? $row['JENIS KELAMIN'] ?? null;
                             $gender = Gender::MALE;
-                            if (stripos((string)$genderRaw, 'P') !== false) { $gender = Gender::FEMALE; }
+                            if ($genderRaw && stripos((string)$genderRaw, 'P') !== false) { $gender = Gender::FEMALE; }
 
-                            $dobRaw = $row['Tanggal Lahir'] ?? null;
+                            $dobRaw = $row['TANGGAL LAHIR'] ?? null;
                             $dob = null;
                             if ($dobRaw) {
                                 try { $dob = \Carbon\Carbon::parse($dobRaw)->format('Y-m-d'); } catch (\Exception $e) {}
@@ -164,35 +246,48 @@ class ListStudents extends ListRecords
 
                             $clean = fn($val) => (empty(trim((string)$val)) ? null : trim((string)$val));
 
-                            Student::create([
+                            $studentData = [
                                 'nisn'             => $nisn,
-                                'full_name'        => $clean($row['Nama']) ?? 'Tanpa Nama',
-                                'nis'              => $clean($row['NIPD']) ?? $clean($row['NIS']) ?? null,
-                                'nik'              => $clean($row['NIK']) ?? null,
-                                'no_kk'            => $clean($row['No KK']) ?? null,
-                                'birth_place'      => $clean($row['Tempat Lahir']) ?? null,
+                                'full_name'        => $clean($row['NAMA'] ?? $row['NAMA PESERTA DIDIK'] ?? 'Tanpa Nama'),
+                                'nis'              => $clean($row['NIPD'] ?? $row['NIS'] ?? null),
+                                'nik'              => $clean($row['NIK'] ?? null),
+                                'no_kk'            => $clean($row['NO KK'] ?? null),
+                                'birth_place'      => $clean($row['TEMPAT LAHIR'] ?? null),
                                 'birth_date'       => $dob,
                                 'gender'           => $gender,
-                                'address'          => $clean($row['Alamat']) ?? null,
-                                'rt'               => $clean($row['RT']) ?? null,
-                                'rw'               => $clean($row['RW']) ?? null,
-                                'dusun'            => $clean($row['Dusun']) ?? null,
-                                'village'          => $clean($row['Kelurahan']) ?? null,
-                                'district'         => $clean($row['Kecamatan']) ?? null,
-                                'father_name'      => $clean($row['Data Ayah']) ?? null,
-                                'mother_name'      => $clean($row['Data Ibu']) ?? null,
-                                'hp'               => $clean($row['HP']) ?? $clean($row['Telepon']) ?? null,
-                                'email'            => $clean($row['E-Mail']) ?? null,
-                                'previous_school'  => $clean($row['Sekolah Asal']) ?? null,
-                                'sibling_position' => $clean($row['Anak ke-berapa']) ?? null,
-                                'sibling_count'    => $clean($row['Jml. Saudara Kandung']) ?? null,
+                                'address'          => $clean($row['ALAMAT'] ?? null),
+                                'rt'               => $clean($row['RT'] ?? null),
+                                'rw'               => $clean($row['RW'] ?? null),
+                                'dusun'            => $clean($row['DUSUN'] ?? null),
+                                'village'          => $clean($row['KELURAHAN'] ?? null),
+                                'district'         => $clean($row['KECAMATAN'] ?? null),
+                                'father_name'      => $clean($row['DATA AYAH'] ?? $row['NAMA AYAH'] ?? null),
+                                'mother_name'      => $clean($row['DATA IBU'] ?? $row['NAMA IBU'] ?? null),
+                                'hp'               => $clean($row['HP'] ?? $row['TELEPON'] ?? null),
+                                'email'            => $clean($row['E-MAIL'] ?? null),
+                                'previous_school'  => $clean($row['SEKOLAH ASAL'] ?? null),
+                                'sibling_position' => $clean($row['ANAK KE-BERAPA'] ?? null),
+                                'sibling_count'    => $clean($row['JML. SAUDARA KANDUNG'] ?? null),
                                 'status'           => StudentStatus::ACTIVE,
                                 'residency_status' => ResidencyStatus::TIDAK_MUKIM,
-                            ]);
+                            ];
+
+                            if ($student) {
+                                // Pulihkan jika terhapus
+                                if ($student->trashed()) {
+                                    $student->restore();
+                                }
+                                // Update data lama
+                                $student->update($studentData);
+                            } else {
+                                // Buat data baru
+                                Student::create($studentData);
+                            }
 
                             $successCount++;
                         } catch (\Exception $e) {
                             $failedCount++;
+                            $errors[] = $e->getMessage();
                         }
                     }
 
@@ -203,6 +298,14 @@ class ListStudents extends ListRecords
                         ->title('Import Selesai')
                         ->body("{$successCount} data berhasil diimport.")
                         ->send();
+
+                    if ($failedCount > 0) {
+                        Notification::make()
+                            ->danger()
+                            ->title('Beberapa Data Gagal')
+                            ->body("{$failedCount} data gagal diimport. Contoh error: " . ($errors[0] ?? 'Unknown error'))
+                            ->send();
+                    }
                 }),
 
             CreateAction::make(),
