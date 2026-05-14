@@ -38,7 +38,6 @@ class StudentForm
                                 FileUpload::make('photo')
                                     ->label('Foto Santri')
                                     ->image()
-                                    ->disk('public')
                                     ->directory('students/photos')
                                     ->columnSpanFull(),
 

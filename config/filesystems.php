@@ -39,12 +39,18 @@ return [
         ],
 
         'public' => [
-            'driver' => 'local',
-            'root' => storage_path('app/public'),
-            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
-            'visibility' => 'public',
-            'throw' => false,
+            'driver' => env('FILESYSTEM_DISK') === 'gcs' ? 'gcs' : 'local',
+            'root' => env('FILESYSTEM_DISK') === 'gcs' ? '' : storage_path('app/public'),
+            'url' => env('FILESYSTEM_DISK') === 'gcs' 
+                ? "https://storage.googleapis.com/".env('GCS_BUCKET') 
+                : env('APP_URL').'/storage',
+            'visibility' => null,
+            'visibilityHandler' => \League\Flysystem\GoogleCloudStorage\UniformBucketLevelAccessVisibility::class,
+            'throw' => true,
             'report' => false,
+            'key_file_path' => env('GCS_KEY_FILE_PATH') ?: null,
+            'project_id' => env('GCS_PROJECT_ID') ?: null,
+            'bucket' => env('GCS_BUCKET') ?: null,
         ],
 
         's3' => [
@@ -57,6 +63,21 @@ return [
             'endpoint' => env('AWS_ENDPOINT'),
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
             'throw' => false,
+            'report' => false,
+        ],
+
+        'gcs' => [
+            'driver' => 'gcs',
+            'key_file_path' => env('GCS_KEY_FILE_PATH') ?: null, // will use ADC if null
+            'project_id' => env('GCS_PROJECT_ID') ?: null, 
+            'bucket' => env('GCS_BUCKET') ?: null,
+            'path_prefix' => env('GCS_PATH_PREFIX', ''), 
+            'url' => "https://storage.googleapis.com/".env('GCS_BUCKET'),
+            'visibility' => null,
+            'visibilityHandler' => \League\Flysystem\GoogleCloudStorage\UniformBucketLevelAccessVisibility::class,
+            'storage_api_uri' => env('GCS_STORAGE_API_URI', null), 
+            'metadata' => ['cacheControl' => 'public,max-age=86400'], 
+            'throw' => true,
             'report' => false,
         ],
 
