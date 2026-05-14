@@ -10,6 +10,13 @@ use App\Enums\ResidencyStatus;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Forms\Components\FileUpload;
+use Filament\Schemas\Components\Wizard;
+use Filament\Schemas\Components\Wizard\Step;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\Checkbox;
+use Filament\Schemas\Components\Section;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Facades\Storage;
@@ -26,91 +33,135 @@ class ListStudents extends ListRecords
                 ->label('Import dari Dapodik (Excel)')
                 ->icon('heroicon-o-document-chart-bar')
                 ->color('success')
+                ->modalWidth('5xl')
                 ->form([
-                    FileUpload::make('file')
-                        ->label('File Excel Dapodik')
-                        ->disk('local')
-                        ->directory('imports')
-                        ->acceptedFileTypes([
-                            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                            'application/vnd.ms-excel',
-                            'text/csv'
-                        ])
-                        ->required(),
-                ])
-                ->action(function (array $data, Action $action) {
-                    $filePath = Storage::disk('local')->path($data['file']);
-                    
-                    try {
-                        $headerRowNumber = 5;
-                        $found = false;
-                        
-                        $tempRows = SimpleExcelReader::create($filePath)->noHeaderRow()->getRows();
-                        foreach ($tempRows as $index => $row) {
-                            $rowString = implode(' ', array_values($row));
-                            if (stripos($rowString, 'NISN') !== false && stripos($rowString, 'Nama') !== false) {
-                                $headerRowNumber = $index + 1;
-                                $found = true;
-                                break;
-                            }
-                        }
+                    Wizard::make([
+                        Step::make('Unggah File')
+                            ->description('Pilih file Excel Dapodik Anda')
+                            ->schema([
+                                FileUpload::make('file')
+                                    ->label('File Excel Dapodik')
+                                    ->directory('imports')
+                                    ->acceptedFileTypes([
+                                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                                        'application/vnd.ms-excel',
+                                        'text/csv'
+                                    ])
+                                    ->required()
+                                    ->live()
+                                    ->afterStateUpdated(function ($state, $set) {
+                                        if (!$state) return;
+                                        
+                                        // Baca file untuk preview
+                                        $tempPath = tempnam(sys_get_temp_dir(), 'preview_');
+                                        file_put_contents($tempPath, Storage::get($state));
+                                        
+                                        try {
+                                            $headerRowNumber = 5;
+                                            $tempRows = SimpleExcelReader::create($tempPath)->noHeaderRow()->getRows();
+                                            foreach ($tempRows as $index => $row) {
+                                                $rowString = implode(' ', array_values($row));
+                                                if (stripos($rowString, 'NISN') !== false && stripos($rowString, 'Nama') !== false) {
+                                                    $headerRowNumber = $index + 1;
+                                                    break;
+                                                }
+                                            }
 
-                        $rows = SimpleExcelReader::create($filePath)
-                            ->headerOnRow($headerRowNumber - 1)
-                            ->getRows()
-                            ->skip(1);
-                            
-                    } catch (\Exception $e) {
-                        Notification::make()
-                            ->danger()
-                            ->title('Gagal membaca file')
-                            ->body($e->getMessage())
-                            ->send();
+                                            $rows = SimpleExcelReader::create($tempPath)
+                                                ->headerOnRow($headerRowNumber - 1)
+                                                ->getRows()
+                                                ->skip(1);
+
+                                            $previewData = [];
+                                            foreach ($rows as $row) {
+                                                $nisn = (string)($row['NISN'] ?? '');
+                                                if (empty($nisn) || stripos($nisn, 'NISN') !== false) continue;
+
+                                                $exists = Student::where('nisn', $nisn)->exists();
+
+                                                $previewData[] = [
+                                                    'should_import' => !$exists,
+                                                    'nisn' => $nisn,
+                                                    'full_name' => $row['Nama'] ?? 'N/A',
+                                                    'is_exists' => $exists,
+                                                    'raw_data' => $row,
+                                                ];
+                                            }
+                                            
+                                            $set('preview_data', $previewData);
+                                        } catch (\Exception $e) {
+                                            // Error silent
+                                        } finally {
+                                            if (file_exists($tempPath)) unlink($tempPath);
+                                        }
+                                    }),
+                            ]),
+                        
+                        Step::make('Review Data')
+                            ->description('Pilih data yang ingin dimasukkan')
+                            ->schema([
+                                Repeater::make('preview_data')
+                                    ->label('Daftar Calon Santri')
+                                    ->schema([
+                                        Section::make()
+                                            ->schema([
+                                                Checkbox::make('should_import')
+                                                    ->label('Pilih')
+                                                    ->columnSpan(1),
+                                                TextInput::make('nisn')
+                                                    ->label('NISN')
+                                                    ->disabled()
+                                                    ->columnSpan(2),
+                                                TextInput::make('full_name')
+                                                    ->label('Nama Lengkap')
+                                                    ->disabled()
+                                                    ->columnSpan(3),
+                                                Toggle::make('is_exists')
+                                                    ->label('Status')
+                                                    ->onIcon('heroicon-m-exclamation-triangle')
+                                                    ->offIcon('heroicon-m-check')
+                                                    ->onColor('danger')
+                                                    ->offColor('success')
+                                                    ->disabled()
+                                                    ->columnSpan(2),
+                                            ])
+                                            ->columns(8)
+                                            ->compact()
+                                    ])
+                                    ->addable(false)
+                                    ->deletable(false)
+                                    ->reorderable(false)
+                                    ->itemLabel(fn (array $state): ?string => $state['full_name'] ?? null),
+                            ]),
+                    ])->persistStepInQueryString('import-step'),
+                ])
+                ->action(function (array $data) {
+                    $previewData = $data['preview_data'] ?? [];
+                    $toImport = array_filter($previewData, fn($item) => $item['should_import'] ?? false);
+
+                    if (empty($toImport)) {
+                        Notification::make()->warning()->title('Tidak ada data yang dipilih')->send();
                         return;
                     }
 
                     $successCount = 0;
                     $failedCount = 0;
-                    $skippedCount = 0;
-                    $errorLog = [];
 
-                    $rows->each(function (array $row, $index) use (&$successCount, &$failedCount, &$skippedCount, &$errorLog) {
+                    foreach ($toImport as $item) {
                         try {
-                            $nisn = $row['NISN'] ?? null;
-                            
-                            if (empty($nisn) || $nisn === 'NISN') {
-                                if (!empty($row['Nama'])) {
-                                    $failedCount++;
-                                    $errorLog[] = "Baris " . ($index + 7) . ": NISN Kosong";
-                                }
-                                return;
-                            }
+                            $row = $item['raw_data'];
+                            $nisn = $item['nisn'];
 
-                            // CEK VALIDASI: Jika NISN sudah ada, skip (jangan sampai dobel)
-                            if (Student::where('nisn', $nisn)->exists()) {
-                                $skippedCount++;
-                                return;
-                            }
-
-                            // Gender mapping
                             $genderRaw = $row['JK'] ?? null;
                             $gender = Gender::MALE;
-                            if (stripos((string)$genderRaw, 'P') !== false) {
-                                $gender = Gender::FEMALE;
-                            }
+                            if (stripos((string)$genderRaw, 'P') !== false) { $gender = Gender::FEMALE; }
 
-                            // Date parsing
                             $dobRaw = $row['Tanggal Lahir'] ?? null;
                             $dob = null;
                             if ($dobRaw) {
-                                try {
-                                    $dob = \Carbon\Carbon::parse($dobRaw)->format('Y-m-d');
-                                } catch (\Exception $e) {
-                                    $dob = null;
-                                }
+                                try { $dob = \Carbon\Carbon::parse($dobRaw)->format('Y-m-d'); } catch (\Exception $e) {}
                             }
 
-                            // Helper untuk membersihkan data
                             $clean = fn($val) => (empty(trim((string)$val)) ? null : trim((string)$val));
 
                             Student::create([
@@ -134,7 +185,7 @@ class ListStudents extends ListRecords
                                 'email'            => $clean($row['E-Mail']) ?? null,
                                 'previous_school'  => $clean($row['Sekolah Asal']) ?? null,
                                 'sibling_position' => $clean($row['Anak ke-berapa']) ?? null,
-                                'sibling_count'    => $clean($row['Jml. Saudara Kandung']) ?? $clean($row["Jml. Saudara\nKandung"]) ?? null,
+                                'sibling_count'    => $clean($row['Jml. Saudara Kandung']) ?? null,
                                 'status'           => StudentStatus::ACTIVE,
                                 'residency_status' => ResidencyStatus::TIDAK_MUKIM,
                             ]);
@@ -142,33 +193,16 @@ class ListStudents extends ListRecords
                             $successCount++;
                         } catch (\Exception $e) {
                             $failedCount++;
-                            $errorLog[] = "Baris " . ($index + 7) . " (" . ($row['Nama'] ?? 'N/A') . "): " . $e->getMessage();
                         }
-                    });
-
-                    // Cleanup
-                    Storage::disk('local')->delete($data['file']);
-
-                    if ($successCount > 0 || $skippedCount > 0) {
-                        $body = "{$successCount} Data baru diimport.";
-                        if ($skippedCount > 0) {
-                            $body .= " {$skippedCount} Data dilewati (sudah ada).";
-                        }
-                        
-                        Notification::make()
-                            ->success()
-                            ->title('Proses Selesai')
-                            ->body($body)
-                            ->send();
                     }
 
-                    if ($failedCount > 0) {
-                        Notification::make()
-                            ->warning()
-                            ->title('Ada Data Gagal')
-                            ->body("{$failedCount} Gagal. Log: " . implode(', ', array_slice($errorLog, 0, 1)))
-                            ->send();
-                    }
+                    if (isset($data['file'])) { Storage::delete($data['file']); }
+
+                    Notification::make()
+                        ->success()
+                        ->title('Import Selesai')
+                        ->body("{$successCount} data berhasil diimport.")
+                        ->send();
                 }),
 
             CreateAction::make(),
