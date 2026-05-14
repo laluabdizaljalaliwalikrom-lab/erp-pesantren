@@ -7,7 +7,7 @@
     <title>{{ settings()->pesantren_name ?? 'Pesantren Modern' }} | Tahfidz & Akademik Unggulan</title>
 
     @if(settings()->favicon_path)
-    <link rel="icon" type="image/x-icon" href="{{ asset('storage/' . settings()->favicon_path) }}">
+    <link rel="icon" type="image/x-icon" href="{{ Storage::disk('public')->url(settings()->favicon_path) }}">
     @endif
 
     <!-- Google Fonts: Outfit & Inter -->
@@ -82,7 +82,7 @@
             <!-- Brand -->
             <div class="flex items-center gap-2 sm:gap-3 overflow-hidden min-w-0">
                 @if(settings()->logo_path)
-                <img src="{{ asset('storage/' . settings()->logo_path) }}" alt="Logo" class="w-8 h-8 sm:w-10 sm:h-10 object-contain shrink-0">
+                <img src="{{ Storage::disk('public')->url(settings()->logo_path) }}" alt="Logo" class="w-8 h-8 sm:w-10 sm:h-10 object-contain shrink-0">
                 @else
                 <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white shrink-0" style="background-color: var(--primary-color)">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-7l-2-2"/><path d="M17 8v.01"/><path d="M20 9v.01"/><path d="M20 13v.01"/><path d="M3 13v.01"/><path d="M3 9v.01"/><path d="M4 11v.01"/><path d="M4 15v.01"/><path d="M12 2v.01"/><path d="M12 5v.01"/><path d="M12 8v.01"/><path d="M12 11v.01"/></svg>
@@ -222,7 +222,7 @@
                 <div class="lg:col-span-2 relative">
                     <div class="relative z-10 rounded-[3rem] overflow-hidden shadow-2xl border-8 border-white">
                         @if(settings()->director_image_path)
-                            <img src="{{ asset('storage/' . settings()->director_image_path) }}" alt="Pimpinan Pesantren" class="w-full aspect-[3/4] object-cover">
+                            <img src="{{ Storage::disk('public')->url(settings()->director_image_path) }}" alt="Pimpinan Pesantren" class="w-full aspect-[3/4] object-cover">
                         @else
                             <div class="w-full aspect-[3/4] bg-emerald-100 flex items-center justify-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-300"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -387,7 +387,7 @@
             <div class="lg:col-span-2 space-y-10">
                 <div class="flex items-center gap-4">
                     @if(settings()->logo_path)
-                    <img src="{{ asset('storage/' . settings()->logo_path) }}" alt="Logo" class="w-14 h-14 object-contain">
+                    <img src="{{ Storage::disk('public')->url(settings()->logo_path) }}" alt="Logo" class="w-14 h-14 object-contain">
                     @else
                     <div class="w-14 h-14 bg-emerald-600 rounded-2xl flex items-center justify-center text-white">
                         <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-7l-2-2"/><path d="M17 8v.01"/><path d="M20 9v.01"/><path d="M12 2v.01"/></svg>

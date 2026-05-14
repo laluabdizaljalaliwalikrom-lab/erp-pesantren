@@ -18,6 +18,7 @@ use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Illuminate\Support\Facades\Storage;
 
 class GuardianPanelProvider extends PanelProvider
 {
@@ -31,10 +32,10 @@ class GuardianPanelProvider extends PanelProvider
             ->login(GuardianLogin::class)
             ->registration(\App\Filament\Guardian\Pages\Auth\GuardianRegister::class)
             ->brandName(fn () => settings()->pesantren_name ?? 'Portal Wali')
-            ->brandLogo(fn () => settings()->logo_path ? asset('storage/' . settings()->logo_path) : null)
+            ->brandLogo(fn () => settings()->logo_path ? Storage::url(settings()->logo_path) : null)
             ->brandLogoHeight('2.5rem')
-            ->favicon(fn () => settings()->favicon_path ? asset('storage/' . settings()->favicon_path) : null)
-            ->colors(fn () => [
+            ->favicon(fn () => settings()->favicon_path ? Storage::url(settings()->favicon_path) : null)
+            ->colors([
                 'primary' => settings()->primary_color ?? Color::Emerald,
             ])
             ->discoverResources(

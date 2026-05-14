@@ -24,6 +24,7 @@ use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Illuminate\Support\Facades\Storage;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -35,10 +36,10 @@ class AdminPanelProvider extends PanelProvider
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->login()
             ->brandName(fn () => settings()->pesantren_name)
-            ->brandLogo(fn () => settings()->logo_path ? asset('storage/' . settings()->logo_path) : null)
+            ->brandLogo(fn () => settings()->logo_path ? Storage::url(settings()->logo_path) : null)
             ->brandLogoHeight('2.5rem')
-            ->favicon(fn () => settings()->favicon_path ? asset('storage/' . settings()->favicon_path) : null)
-            ->colors(fn () => [
+            ->favicon(fn () => settings()->favicon_path ? Storage::url(settings()->favicon_path) : null)
+            ->colors([
                 'primary' => settings()->primary_color ?? Color::Emerald,
             ])
             ->spa(hasPrefetching: false)

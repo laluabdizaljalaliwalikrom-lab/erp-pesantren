@@ -35,7 +35,7 @@
                 <div style="flex-shrink: 0; position: relative;">
                     <div class="guardian-avatar-fix" style="box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 2px solid var(--card-bg);">
                         @if($child->photo)
-                            <img src="{{ asset('storage/' . $child->photo) }}" alt="{{ $child->full_name }}" class="guardian-avatar-fix">
+                            <img src="{{ Storage::disk('public')->url($child->photo) }}" alt="{{ $child->full_name }}" class="guardian-avatar-fix">
                         @else
                             <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #3b82f6 0%, #4f46e5 100%); display: flex; align-items: center; justify-content: center; border-radius: 1.25rem;">
                                 <span style="color: white; font-weight: 900; font-size: 1.25rem;">{{ strtoupper(substr($child->full_name, 0, 1)) }}</span>

@@ -17,7 +17,7 @@
             <div class="text-center mb-8">
                 @if(settings()->logo_path)
                     <div class="inline-flex items-center justify-center p-3 bg-white rounded-3xl shadow-sm mb-5 border border-emerald-100/50">
-                        <img src="{{ asset('storage/' . settings()->logo_path) }}" alt="Logo" class="h-16 w-16 object-contain">
+                        <img src="{{ Storage::disk('public')->url(settings()->logo_path) }}" alt="Logo" class="h-16 w-16 object-contain">
                     </div>
                 @else
                     <div class="inline-flex items-center justify-center h-16 w-16 bg-emerald-600 rounded-2xl shadow-lg mb-5">

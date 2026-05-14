@@ -18,6 +18,7 @@ use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Illuminate\Support\Facades\Storage;
 
 class CashierPanelProvider extends PanelProvider
 {
@@ -27,9 +28,12 @@ class CashierPanelProvider extends PanelProvider
             ->id('cashier')
             ->path('cashier')
             ->login()
-            ->brandName('ERP Pesantren')
+            ->brandName(fn () => settings()->pesantren_name ?? 'Kasir ERP')
+            ->brandLogo(fn () => settings()->logo_path ? Storage::url(settings()->logo_path) : null)
+            ->brandLogoHeight('2.5rem')
+            ->favicon(fn () => settings()->favicon_path ? Storage::url(settings()->favicon_path) : null)
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => settings()->primary_color ?? Color::Amber,
             ])
             ->spa()
             ->sidebarCollapsibleOnDesktop()

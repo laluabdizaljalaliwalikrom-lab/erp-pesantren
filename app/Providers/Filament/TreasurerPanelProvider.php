@@ -18,6 +18,7 @@ use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Illuminate\Support\Facades\Storage;
 
 class TreasurerPanelProvider extends PanelProvider
 {
@@ -27,9 +28,12 @@ class TreasurerPanelProvider extends PanelProvider
             ->id('treasurer')
             ->path('treasurer')
             ->login()
-            ->brandName('ERP Pesantren')
+            ->brandName(fn () => settings()->pesantren_name ?? 'Bendahara ERP')
+            ->brandLogo(fn () => settings()->logo_path ? Storage::url(settings()->logo_path) : null)
+            ->brandLogoHeight('2.5rem')
+            ->favicon(fn () => settings()->favicon_path ? Storage::url(settings()->favicon_path) : null)
             ->colors([
-                'primary' => Color::Emerald,
+                'primary' => settings()->primary_color ?? Color::Emerald,
             ])
             ->spa()
             ->sidebarCollapsibleOnDesktop()
