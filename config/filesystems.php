@@ -40,9 +40,9 @@ return [
 
         'public' => [
             'driver' => env('FILESYSTEM_DISK', 'local'),
-            'root' => storage_path('app/public'),
+            'root' => env('FILESYSTEM_DISK') === 'gcs' ? '' : storage_path('app/public'),
             'url' => env('FILESYSTEM_DISK') === 'gcs' 
-                ? "https://storage.googleapis.com/".env('GCS_BUCKET') 
+                ? "https://storage.googleapis.com/".env('GCS_BUCKET')."/" 
                 : env('APP_URL').'/storage',
             'project_id' => env('GCS_PROJECT_ID'),
             'bucket' => env('GCS_BUCKET'),
@@ -70,7 +70,7 @@ return [
             'project_id' => env('GCS_PROJECT_ID') ?: null, 
             'bucket' => env('GCS_BUCKET') ?: null,
             'path_prefix' => env('GCS_PATH_PREFIX', ''), 
-            'url' => "https://storage.googleapis.com/".env('GCS_BUCKET'),
+            'url' => "https://storage.googleapis.com/".env('GCS_BUCKET')."/",
             'visibility' => null,
             'visibilityHandler' => \League\Flysystem\GoogleCloudStorage\UniformBucketLevelAccessVisibility::class,
             'storage_api_uri' => env('GCS_STORAGE_API_URI', null), 
