@@ -39,8 +39,8 @@ return [
         ],
 
         'public' => [
-            'driver' => env('FILESYSTEM_DISK', 'local'),
-            'root' => env('FILESYSTEM_DISK') === 'gcs' ? '' : storage_path('app/public'),
+            'driver' => $publicDriver = env('FILESYSTEM_DISK', 'local'),
+            'root' => $publicDriver === 'gcs' ? '' : storage_path('app/public'),
             'url' => env('FILESYSTEM_DISK') === 'gcs' 
                 ? "https://storage.googleapis.com/".env('GCS_BUCKET')."/" 
                 : env('APP_URL').'/storage',
