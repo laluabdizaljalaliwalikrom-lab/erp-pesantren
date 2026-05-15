@@ -44,8 +44,11 @@ return [
             'url' => env('FILESYSTEM_DISK') === 'gcs' 
                 ? "https://storage.googleapis.com/".env('GCS_BUCKET') 
                 : env('APP_URL').'/storage',
+            'project_id' => env('GCS_PROJECT_ID'),
+            'bucket' => env('GCS_BUCKET'),
             'visibility' => 'public',
-            'throw' => true,
+            'visibilityHandler' => \League\Flysystem\GoogleCloudStorage\UniformBucketLevelAccessVisibility::class,
+            'throw' => false,
         ],
 
         's3' => [
