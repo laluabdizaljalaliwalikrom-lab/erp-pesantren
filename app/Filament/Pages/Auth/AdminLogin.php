@@ -1,27 +1,18 @@
 <?php
 
-declare(strict_types=1);
+namespace App\Filament\Pages\Auth;
 
-namespace App\Filament\Guardian\Pages;
-
-use Filament\Actions\Action;
 use Filament\Auth\Pages\Login as BaseLogin;
-use Illuminate\Support\HtmlString;
+use Illuminate\Contracts\View\View;
 
-class GuardianLogin extends BaseLogin
+class AdminLogin extends BaseLogin
 {
-    // Default actions will now only include the Sign In button.
-    // The Sign Up link has been moved to the AUTH_LOGIN_FORM_AFTER render hook
-    // to ensure it is positioned vertically below the form actions.
-
-    public function hasRegistrationLink(): bool
-    {
-        return false;
-    }
-
+    /**
+     * @return string
+     */
     public function getLayout(): string
     {
-        return 'filament.guardian.layouts.login';
+        return 'filament.admin.layouts.login';
     }
 
     public function form(\Filament\Schemas\Schema $schema): \Filament\Schemas\Schema
@@ -29,7 +20,7 @@ class GuardianLogin extends BaseLogin
         return $schema
             ->components([
                 $this->getEmailFormComponent()
-                    ->placeholder('Email Wali Santri')
+                    ->placeholder('Alamat Email')
                     ->label(null),
                 $this->getPasswordFormComponent()
                     ->placeholder('Kata Sandi')

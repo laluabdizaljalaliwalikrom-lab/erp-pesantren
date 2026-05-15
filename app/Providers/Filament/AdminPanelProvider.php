@@ -34,7 +34,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->viteTheme('resources/css/filament/admin/theme.css')
-            ->login()
+            ->login(\App\Filament\Pages\Auth\AdminLogin::class)
             ->brandName(fn () => settings()->pesantren_name)
             ->brandLogo(fn () => settings()->logo_path ? Storage::url(settings()->logo_path) : null)
             ->brandLogoHeight('2.5rem')

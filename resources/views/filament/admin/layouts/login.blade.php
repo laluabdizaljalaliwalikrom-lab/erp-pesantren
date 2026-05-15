@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Wali Santri - {{ settings()->pesantren_name ?? 'ERP Pesantren' }}</title>
+    <title>Admin Login - {{ settings()->pesantren_name ?? 'ERP Pesantren' }}</title>
     
     <!-- Google Fonts: Outfit & Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,11 +18,11 @@
         h1, h2, h3, .font-outfit { font-family: 'Outfit', sans-serif; }
 
         .sufi-bg {
-            background-color: #042f2e; /* Deep Teal for Wali */
+            background-color: #0f172a; /* Darker for Admin (Slate 950) */
             background-image: 
-                radial-gradient(circle at 0% 0%, rgba(16, 185, 129, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 100% 100%, rgba(5, 150, 105, 0.15) 0%, transparent 50%),
-                url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 0l20 40-20 40-20-40z' fill='%23ffffff' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
+                radial-gradient(circle at 0% 0%, rgba(16, 185, 129, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, rgba(5, 150, 105, 0.1) 0%, transparent 50%),
+                url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 0l20 40-20 40-20-40z' fill='%23ffffff' fill-opacity='0.02' fill-rule='evenodd'/%3E%3C/svg%3E");
             background-attachment: fixed;
         }
 
@@ -39,15 +39,41 @@
 
         @keyframes floating {
             0% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(1deg); }
+            50% { transform: translateY(-15px) rotate(0.5deg); }
             100% { transform: translateY(0px) rotate(0deg); }
         }
 
         @keyframes fadeInUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
         .fade-up { animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both; }
         
+        .fi-btn { 
+            border-radius: 16px !important; 
+            padding: 12px 24px !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.025em !important;
+            transition: all 0.3s ease !important;
+        }
+        .fi-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.4);
+        }
+
+        .fi-fo-text-input {
+            border-radius: 16px !important;
+            background: #f8fafc !important;
+            border: 1px solid #e2e8f0 !important;
+            padding: 4px 8px !important;
+            transition: all 0.3s ease !important;
+        }
+        .fi-fo-text-input:focus-within {
+            background: white !important;
+            border-color: #10b981 !important;
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1) !important;
+        }
+
         /* --- TOTAL CLEANUP FILAMENT UI --- */
         
+        /* 1. Sembunyikan Header & Judul Ganda */
         .fi-simple-header, 
         .fi-simple-header-title, 
         .fi-simple-header-description,
@@ -55,11 +81,13 @@
             display: none !important; 
         }
 
+        /* 2. Sembunyikan Label Input (karena sudah pakai placeholder) */
         .fi-fo-field-label-wrp,
         .fi-fo-field-label { 
             display: none !important; 
         }
 
+        /* 3. Rapikan Container Utama */
         .fi-simple-main { 
             background: transparent !important; 
             box-shadow: none !important; 
@@ -76,6 +104,7 @@
             padding: 0 !important;
         }
 
+        /* 4. Style Kotak Input (Input Fields) */
         .fi-input-wrp {
             border-radius: 16px !important;
             background: #f8fafc !important;
@@ -125,6 +154,7 @@
             color: rgba(255, 255, 255, 0.3) !important;
         }
 
+        /* Rapikan tombol mata (password toggle) agar tidak merusak tinggi */
         .fi-input-wrp button {
             margin-right: 8px !important;
             padding: 8px !important;
@@ -136,6 +166,7 @@
             color: #94a3b8 !important;
         }
 
+        /* 5. Style Tombol Login (Submit Button) */
         .fi-ac-btn-action,
         .fi-btn { 
             width: 100% !important;
@@ -150,7 +181,7 @@
             box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2) !important;
             border: none !important;
             margin-top: 10px !important;
-            position: relative !important;
+            position: relative !important; /* Kunci agar loading tetap di dalam */
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
@@ -186,6 +217,7 @@
             opacity: 0 !important;
         }
 
+        /* 6. Style Link "Lupa Password" & "Remember Me" */
         .fi-checkbox {
             border-radius: 6px !important;
             border-color: #d1d5db !important;
@@ -206,11 +238,11 @@
 
 <div class="h-screen flex overflow-hidden">
 
-    {{-- LEFT: Spiritual & Hero Visual --}}
+    {{-- LEFT: Authority & Security --}}
     <div class="hidden lg:flex lg:w-1/2 relative overflow-hidden sufi-bg flex-col items-center justify-center px-12 text-white border-r border-white/5 h-full">
         
-        <div class="absolute top-[-10%] right-[-10%] w-[400px] h-[400px] bg-emerald-500/10 rounded-full blur-[120px]"></div>
-        <div class="absolute bottom-[-10%] left-[-10%] w-[300px] h-[300px] bg-teal-500/10 rounded-full blur-[100px]"></div>
+        <!-- Decorative Ornaments -->
+        <div class="absolute top-[-10%] right-[-10%] w-[400px] h-[400px] bg-blue-500/5 rounded-full blur-[120px]"></div>
         
         <div class="relative z-10 text-center max-w-lg fade-up">
             <div class="floating mb-10">
@@ -219,39 +251,39 @@
                         <img src="{{ Storage::disk('public')->url(settings()->logo_path) }}" alt="Logo" class="h-24 w-24 object-contain">
                     </div>
                 @else
-                    <div class="h-24 w-24 bg-emerald-500/20 backdrop-blur-xl rounded-[2rem] flex items-center justify-center mx-auto shadow-2xl border border-white/10">
-                        <svg class="w-12 h-12 text-emerald-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21L12 3M12 3L5 10M12 3L19 10" /></svg>
+                    <div class="h-24 w-24 bg-slate-500/20 backdrop-blur-xl rounded-[2rem] flex items-center justify-center mx-auto shadow-2xl border border-white/10">
+                        <svg class="w-12 h-12 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.74c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg>
                     </div>
                 @endif
             </div>
 
             <div class="space-y-6">
                 <div class="space-y-2">
-                    <p class="text-2xl font-light text-emerald-400/80 italic" style="font-family: 'Times New Roman', serif;">بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ</p>
+                    <p class="text-2xl font-light text-slate-400/80 italic" style="font-family: 'Times New Roman', serif;">بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ</p>
                     <h1 class="text-5xl font-outfit font-bold tracking-tight leading-[1.1]">
-                        Menuju <br>
-                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-200 to-teal-200">Keberkahan & Ilmu</span>
+                        Portal Utama <br>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-slate-200 to-emerald-200">Administrasi & Kendali</span>
                     </h1>
                 </div>
                 
-                <p class="text-lg text-emerald-100/70 font-light leading-relaxed">
-                    Selamat datang di Portal Wali Santri {{ settings()->pesantren_name ?? 'Pesantren' }}. 
-                    Pantau perkembangan pendidikan dan akhlak buah hati Anda dengan khidmat.
+                <p class="text-lg text-slate-400 font-light leading-relaxed">
+                    Akses terbatas bagi pengelola {{ settings()->pesantren_name ?? 'Pesantren' }}. 
+                    Kelola data, keuangan, dan akademik dalam satu kendali terpusat yang aman.
                 </p>
 
-                <div class="flex justify-center gap-3 pt-4 text-xs font-bold tracking-widest uppercase text-emerald-500/60">
-                    <span>Amanah</span>
+                <div class="flex justify-center gap-3 pt-4 text-xs font-bold tracking-widest uppercase text-slate-500">
+                    <span>Integritas</span>
                     <span class="text-emerald-800">•</span>
-                    <span>Tarbiyah</span>
+                    <span>Keamanan</span>
                     <span class="text-emerald-800">•</span>
-                    <span>Ukhuwah</span>
+                    <span>Efisiensi</span>
                 </div>
             </div>
         </div>
 
         <div class="absolute bottom-8 left-0 right-0 text-center">
-            <p class="text-[10px] font-bold tracking-[0.2em] uppercase text-white/20">
-                Lembaga Pendidikan Islam Terpadu • {{ settings()->pesantren_name }}
+            <p class="text-[10px] font-bold tracking-[0.2em] uppercase text-white/10">
+                System Administrator Control Center • v3.0
             </p>
         </div>
     </div>
@@ -268,32 +300,15 @@
                         <img src="{{ Storage::disk('public')->url(settings()->logo_path) }}" alt="Logo" class="h-16 w-16 object-contain">
                     @endif
                 </div>
-                <h2 class="text-4xl font-outfit font-bold text-slate-900 dark:text-white tracking-tight">Masuk Portal</h2>
+                <h2 class="text-4xl font-outfit font-bold text-slate-900 dark:text-white tracking-tight">Admin Login</h2>
                 <p class="text-slate-500 dark:text-slate-400 leading-relaxed">
-                    Silakan masukkan kredensial wali santri untuk mengakses data akademik dan administrasi.
+                    Gunakan kredensial otorisasi tingkat tinggi Anda untuk masuk ke sistem pusat.
                 </p>
             </div>
 
             <div class="bg-white dark:bg-gray-900/50">
                 {{ $slot }}
             </div>
-
-            @if(settings()->phone ?? null)
-            <div class="pt-8 border-t border-slate-100 dark:border-white/5">
-                <div class="flex items-center gap-4 p-4 rounded-2xl bg-emerald-50/50 dark:bg-emerald-500/5 border border-emerald-100/50 dark:border-emerald-500/10">
-                    <div class="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center text-white shrink-0">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.125.557 4.118 1.528 5.849L0 24l6.335-1.652A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.808 9.808 0 01-5.001-1.372l-.36-.214-3.737.978.999-3.645-.235-.374A9.778 9.778 0 012.182 12c0-5.417 4.401-9.818 9.818-9.818s9.818 4.401 9.818 9.818-4.401 9.818-9.818 9.818z"/></svg>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-0.5">Butuh Bantuan?</p>
-                        <p class="text-sm text-emerald-600/80 dark:text-emerald-400/60 truncate">WhatsApp: {{ settings()->phone }}</p>
-                    </div>
-                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', settings()->phone) }}" target="_blank" class="px-4 py-2 rounded-xl bg-white dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold border border-emerald-100 dark:border-emerald-500/30 hover:bg-emerald-50 transition-colors">
-                        Hubungi
-                    </a>
-                </div>
-            </div>
-            @endif
 
             <div class="pt-8 border-t border-slate-100 dark:border-white/5 text-center">
                 <a href="/" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700 flex items-center justify-center gap-2 group transition-all">
