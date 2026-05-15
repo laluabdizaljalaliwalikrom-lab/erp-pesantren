@@ -35,10 +35,10 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->login(\App\Filament\Pages\Auth\AdminLogin::class)
-            ->brandName(fn () => settings()->pesantren_name)
-            ->brandLogo(fn () => settings()->logo_path ? Storage::url(settings()->logo_path) : null)
+            ->brandName(fn() => settings()->pesantren_name)
+            ->brandLogo(fn() => settings()->logo_path ? Storage::url(settings()->logo_path) : null)
             ->brandLogoHeight('2.5rem')
-            ->favicon(fn () => settings()->favicon_path ? Storage::url(settings()->favicon_path) : null)
+            ->favicon(fn() => settings()->favicon_path ? Storage::url(settings()->favicon_path) : null)
             ->colors([
                 'primary' => settings()->primary_color ?? Color::Emerald,
             ])
@@ -65,7 +65,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->renderHook(
                 PanelsRenderHook::GLOBAL_SEARCH_BEFORE,
-                fn () => view('filament.components.topbar-date-time'),
+                fn() => view('filament.components.topbar-date-time'),
             )
             ->middleware([
                 EncryptCookies::class,

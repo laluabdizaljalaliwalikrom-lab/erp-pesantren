@@ -260,7 +260,7 @@
 
     <!-- Visi Misi Section -->
     <section id="visi" class="py-24 lg:py-32 bg-white islamic-pattern">
-        <div class="container mx-auto px-8 sm:px-10 text-center space-y-4">
+        <div class="container mx-auto px-8 sm:px-10 text-center space-y-4 mb-16 lg:mb-24">
             <h4 class="text-emerald-600 font-bold uppercase tracking-widest text-sm">Pilar Filosofis</h4>
             <h2 class="text-4xl lg:text-5xl font-outfit font-bold text-slate-900">Visi & Misi Utama</h2>
         </div>
@@ -326,20 +326,20 @@
             <!-- Stats Bar -->
             <div class="mt-16 grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="bg-white p-8 rounded-3xl text-center shadow-sm border border-slate-100 bento-card">
-                    <div class="text-4xl font-outfit font-bold text-emerald-700 mb-2">{{ $stats['students_count'] ?: '1.2k+' }}</div>
+                    <div class="text-4xl font-outfit font-bold text-emerald-700 mb-2">{{ $stats['students_count'] ?: '0' }}</div>
                     <div class="text-slate-400 text-xs font-bold uppercase tracking-widest">Santri Aktif</div>
                 </div>
                 <div class="bg-white p-8 rounded-3xl text-center shadow-sm border border-slate-100 bento-card">
-                    <div class="text-4xl font-outfit font-bold text-emerald-700 mb-2">{{ $stats['teachers_count'] ?: '85+' }}</div>
-                    <div class="text-slate-400 text-xs font-bold uppercase tracking-widest">Pengajar</div>
-                </div>
-                <div class="bg-white p-8 rounded-3xl text-center shadow-sm border border-slate-100 bento-card">
-                    <div class="text-4xl font-outfit font-bold text-emerald-700 mb-2">{{ $stats['alumni_count'] ?: '5k+' }}</div>
+                    <div class="text-4xl font-outfit font-bold text-emerald-700 mb-2">{{ $stats['alumni_count'] ?: '0' }}</div>
                     <div class="text-slate-400 text-xs font-bold uppercase tracking-widest">Alumni</div>
                 </div>
                 <div class="bg-white p-8 rounded-3xl text-center shadow-sm border border-slate-100 bento-card">
-                    <div class="text-4xl font-outfit font-bold text-emerald-700 mb-2">{{ $stats['achievements_count'] ?: '120+' }}</div>
-                    <div class="text-slate-400 text-xs font-bold uppercase tracking-widest">Prestasi</div>
+                    <div class="text-4xl font-outfit font-bold text-emerald-700 mb-2">{{ $stats['institutions_count'] ?: '0' }}</div>
+                    <div class="text-slate-400 text-xs font-bold uppercase tracking-widest">Lembaga</div>
+                </div>
+                <div class="bg-white p-8 rounded-3xl text-center shadow-sm border border-slate-100 bento-card">
+                    <div class="text-4xl font-outfit font-bold text-emerald-700 mb-2">{{ $stats['classes_count'] ?: '0' }}</div>
+                    <div class="text-slate-400 text-xs font-bold uppercase tracking-widest">Kelas</div>
                 </div>
             </div>
         </div>
@@ -362,7 +362,7 @@
             @forelse($news as $item)
             <article class="group cursor-pointer">
                 <div class="relative rounded-[2.5rem] overflow-hidden mb-8 shadow-xl">
-                    <img src="{{ asset('images/landing/mosque.png') }}" class="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-700" alt="News Image">
+                    <img src="{{ $item->image_path ? Storage::disk('public')->url($item->image_path) : asset('images/landing/mosque.png') }}" class="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-700" alt="{{ $item->title }}">
                     <div class="absolute top-6 left-6 px-4 py-1.5 bg-white/90 backdrop-blur-md rounded-full text-[10px] font-bold text-emerald-700 uppercase tracking-wider">{{ $item->category }}</div>
                 </div>
                 <div class="space-y-4 px-2">

@@ -21,11 +21,11 @@ Route::get('/', function () {
     $stats = [
         'students_count' => Student::where('status', StudentStatus::ACTIVE)->count(),
         'alumni_count' => Student::where('status', StudentStatus::GRADUATED)->count(),
-        'teachers_count' => \App\Models\User::count(), // Simplified
-        'achievements_count' => 12, // Still static for now or can be added to settings
+        'institutions_count' => \App\Models\Institution::count(),
+        'classes_count' => \App\Models\SchoolClass::count(),
     ];
 
-    $news = Announcement::where('is_active', true)
+    $news = \App\Models\Post::where('is_published', true)
         ->latest('published_at')
         ->take(3)
         ->get();
